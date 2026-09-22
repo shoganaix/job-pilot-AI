@@ -146,7 +146,7 @@ src/jobpilot/
 ```
 
 ## Privacy
-- `.env (API keys)`` and ``data/`` (personal job listings) are included in .gitignore: they are **not** committed to the repository.
+- ``.env (API keys)`` and ``data/`` (personal job listings) are included in .gitignore: they are **not** committed to the repository.
 - The only personal data tracked by Git is ``config/master_cv.yaml``.
   
 # [ESPAÑOL]
