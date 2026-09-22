@@ -10,6 +10,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -122,6 +123,33 @@ class MasterCV:
     projects: list[dict] = field(default_factory=list)
     certifications: list[dict] = field(default_factory=list)
 
+    def in_lang(self, lang: str, default: str = "es") -> MasterCV:
+        """A copy with every narrative field resolved to ``lang``.
+
+        Narrative values may be plain strings (language-neutral) or dicts like
+        ``{es: ..., en: ...}``. Structural dicts/lists are walked recursively;
+        skills and contact are never translated.
+        """
+        return MasterCV(
+            contact=self.contact,
+            summary=_pick_lang(self.summary, lang, default),
+            experience=_pick_lang(self.experience, lang, default),
+            education=_pick_lang(self.education, lang, default),
+            skills=self.skills,
+            projects=_pick_lang(self.projects, lang, default),
+            certifications=_pick_lang(self.certifications, lang, default),
+        )
+
+
+def _pick_lang(value: Any, lang: str, default: str) -> Any:
+    if isinstance(value, dict):
+        if all(isinstance(k, str) and k.lower() in {"es", "en"} for k in value):
+            return value.get(lang) or value.get(default) or next(iter(value.values()), "")
+        return {k: _pick_lang(v, lang, default) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_pick_lang(v, lang, default) for v in value]
+    return value
+
 
 # --------------------------------------------------------------------------- #
 # Top level
@@ -143,6 +171,11 @@ class Config:
             if fam.id == family_id:
                 return fam
         raise ConfigError(f"unknown family: {family_id!r}")
+
+    def master(self, lang: str | None = None) -> MasterCV:
+        """The master CV resolved to a language (default: profile.languages[0])."""
+        default = self.profile.languages[0] if self.profile.languages else "es"
+        return self.master_cv.in_lang(lang or default, default=default)
 
     @property
     def sources(self) -> list[str]:
