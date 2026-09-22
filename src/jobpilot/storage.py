@@ -129,6 +129,14 @@ def latest_run(conn: sqlite3.Connection) -> Run | None:
                stats=json.loads(row["stats"] or "{}"))
 
 
+def latest_scored_run(conn: sqlite3.Connection) -> int | None:
+    """Id of the most recent run that actually stored scores."""
+    row = conn.execute(
+        "SELECT run_id FROM offer_scores GROUP BY run_id ORDER BY run_id DESC LIMIT 1"
+    ).fetchone()
+    return row["run_id"] if row else None
+
+
 # --------------------------------------------------------------------------- #
 # Offers
 # --------------------------------------------------------------------------- #

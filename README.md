@@ -18,6 +18,7 @@ Personal AI-powered job application agent (CLI + SQLite). Searches for job oppor
 | `jobpilot queue set <id> --status apply` | Adds a job opportunity to your application queue |
 | `jobpilot open <id>` | Opens the job listing URL in your browser |
 | `jobpilot cv <id>` | Generates the tailored CV (markdown + PDF) into `output/cv/` |
+| `jobpilot report` | Generates the HTML dashboard (`output/report.html`) |
 
 ### Scoring and triage
 
@@ -108,6 +109,10 @@ cv_es = config.master("es")   # All narrative fields resolved to Spanish (defaul
 
 The generated CV language is determined by `languages[0]` unless explicitly overridden with `--lang`.
 
+## HTML Dashboard
+
+`jobpilot report` renders a self-contained `output/report.html` (no external assets) with KPI cards, the application queue, the latest scoring run, a score breakdown for the top offers and a per-family summary. Use `--open` to view it in your browser, or `--family X` to filter the scoring tables.
+
 ## Development
 
 Run linting and tests:
@@ -157,6 +162,7 @@ por oferta y mantiene una cola de aplicaciones.
 | `jobpilot queue set <id> --status apply` | Añade una oferta a tu cola de aplicaciones |
 | `jobpilot open <id>` | Abre la URL de la oferta en el navegador |
 | `jobpilot cv <id>` | Genera el CV tailorizado (markdown + PDF) en `output/cv/` |
+| `jobpilot report` | Genera el dashboard HTML (`output/report.html`) |
 
 Triage del scoring:
 - **apply** → score ≥ 65 (y relevancia de skills mínima) → aplicar.
@@ -266,6 +272,18 @@ Genera un CV adaptado a cada oferta en `output/cv/cv_<id>_<lang>.md` y
   sin texto inventado.
 - `--lang es|en` fuerza idioma; `--show` imprime el markdown; `--no-pdf` omite el
   PDF; `--family X` restringe skills al conjunto de esa familia.
+
+## Dashboard de aplicaciones (`jobpilot report`)
+
+Genera `output/report.html` autocontenido (sin assets externos) con tarjetas KPI
+(ofertas, último run de scoring, triage, cola, CV generados), la cola de
+aplicaciones, las mejores posiciones del último run con desglose de scoring
+(top 5 con barras por dimensión) y un resumen por familia.
+
+- `jobpilot queue set <id> --status apply --cv-file output/cv/cv_<id>_<lang>.md`
+  enlaza el CV generado en la cola y el report lo muestra como link.
+- `jobpilot queue --status apply` filtra la cola por estado.
+- `--open` abre el report en el navegador; `--family X` filtra las tablas de scoring.
 
 ## Desarrollo
 
