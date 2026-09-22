@@ -1,4 +1,139 @@
-# Job Pilot AI
+# Job Pilot AI 
+# [ENGLISH]
+Personal AI-powered job application agent (CLI + SQLite). Searches for job opportunities across free sources, ranks them using a matching engine (0–100), generates a tailored CV for each position, and manages an application queue.
+
+> Designed as a Python/CLI programming portfolio project, not as a commercial product. The job search engine relies on free APIs (keyless or with free API keys).
+
+## Features
+
+| Command | Description |
+|---|---|
+| `jobpilot init` | Initializes the project structure (configuration, data directories, SQLite schema) |
+| `jobpilot plan` | Displays a summary of your configuration: job families, queries, and sources |
+| `jobpilot sources` | Tests connectivity to the configured job sources |
+| `jobpilot sync` | Fetches job listings based on each family's search queries |
+| `jobpilot score [--family X --limit N]` | Scores stored job listings (0–100) and classifies them |
+| `jobpilot offers [--family X]` | Lists saved job opportunities and their corresponding families |
+| `jobpilot query <text>` | Searches through previously stored job listings |
+| `jobpilot queue set <id> --status apply` | Adds a job opportunity to your application queue |
+| `jobpilot open <id>` | Opens the job listing URL in your browser |
+
+### Scoring and triage
+
+- **apply** → Score ≥ 65 (and minimum skill relevance met) → Recommended for application.
+- **review** → Score ≥ 45 → Requires manual review.
+- **discard** → Score < 45 or fails hard filters (US citizenship, security clearance, excluded company).
+
+## Requirements
+
+- Python 3.12+ (tested on Python 3.14).
+- Internet connection for job synchronization (all sources are keyless except Adzuna).
+
+## Installation
+
+```bash
+git clone https://github.com/shoganaix/job-pilot-AI.git
+cd job-pilot-AI
+python -m venv .venv
+.venv\Scripts\activate        # Windows (PowerShell)
+pip install -e ".[dev]"       # Installs the jobpilot CLI + ruff + pytest
+
+jobpilot init
+```
+
+The `init` command generates the `config/` and `data/` directories.
+
+Copy `.env.example` to `.env` and add your API credentials:
+
+```env
+ADZUNA_APP_ID=
+ADZUNA_APP_KEY=
+```
+
+Adzuna remains disabled until valid credentials are provided in `.env`.
+
+It is the only source with a rate limit of 25 requests/minute and 250 requests/day, making it particularly useful for covering the Spanish job market.
+
+## Quick Configuration
+
+All settings are managed through YAML files, without modifying the source code.
+
+### `config/profile.yaml`
+
+- **`search`** — Search locations (`adzuna_country`), `target_offers`, and per-query limits.
+- **`families`** — Groups your target job roles. Each family includes:
+  - `queries`: Search phrases sent to each job source.
+  - `sources`: `adzuna, arbeitnow, remoteok, himalayas` (+ ATS boards).
+  - `skills`: A `skill → weight (1–10)` mapping used to calculate skill relevance.
+  - `interest`: Editorial interest score (0–10), used as a scoring dimension.
+- **`scoring`** — `threshold` (apply), `review_threshold`, and the weights of the six scoring dimensions (`skills, experience, education, location, seniority, interest`), which must sum to 100.
+- **`profile`** — `seniority_target`, `languages`, location preferences (area + weight), and `exclude_companies`.
+- **`ats_companies`** — Company slugs for Greenhouse/Lever (keyless job boards), allowing direct access to their ATS listings.
+
+### `config/master_cv.yaml`
+
+Your master CV, used by the scoring engine to determine which skills you already possess and by Phase 3 to generate tailored CVs.
+
+The master CV is bilingual (**es/en**): narrative fields are stored as `{es: ..., en: ...}`, and `Config.master(lang)` resolves them deterministically.
+
+- `contact` — Always language-neutral.
+- `summary`, `experience`, `education`, `projects`, `certifications` — Support `{es, en}` dictionaries for individual fields.
+- `education` — Contains only actual university degree qualifications. Other qualifications (microdegrees, ongoing training, and certifications) belong in `certifications`.
+- `skills` — Groups of technologies and technical competencies. Any group whose name contains `camino` (e.g., `En camino (robótica/embedded)`) is assigned a 0.5 factor in the scoring engine. This allows you to highlight skills you are currently developing without presenting them as established professional experience.
+
+## Personal Configuration
+
+The README describes the configuration pattern rather than individual user settings. Each user can customize the following:
+
+1. **Search queries and job families** in `profile.yaml` → `families`. Add or remove `queries` to cover approximately 20 target roles, and assign skill weights based on their requirements.
+2. **Scoring** → Increase `threshold` to reduce irrelevant results, or adjust `weights` (e.g., increase `location` if you are only interested in remote positions within your country).
+3. **Your technical stack** in `master_cv.yaml` → `skills`. Place technologies you genuinely master in standard skill groups, and technologies you are currently learning in an `En camino (...)` group.
+4. **Location preferences** → `profile.locations`: Define each `area` with its corresponding `weight`. Job listings are scored against the best matching location preference (onsite in Spain, Remote EU, etc.).
+5. **Excluded companies and eligibility filters** → Configure `profile.exclude_companies`. Positions requiring US citizenship, security clearance, or candidates to be located in the US are automatically discarded.
+
+## Bilingual Support (ES/EN)
+
+The master CV is bilingual by design.
+
+Example:
+
+```python
+from jobpilot.config import load_config
+
+config = load_config()
+cv_en = config.master("en")   # All narrative fields resolved to English
+cv_es = config.master("es")   # All narrative fields resolved to Spanish (default)
+```
+
+The generated CV language is determined by `languages[0]` unless explicitly overridden with `--lang`.
+
+## Development
+
+Run linting and tests:
+
+```bash
+.\.venv\Scripts\ruff.exe check src tests
+.\.venv\Scripts\python.exe -m pytest
+```
+
+### Project Structure
+
+```text
+src/jobpilot/
+  cli.py            # CLI (argparse + rich)
+  config.py         # YAML loader + bilingual resolver (MasterCV.in_lang)
+  models.py         # Data types: Offer, SourcePage, Triage...
+  storage.py        # SQLite (upsert, deduplication, offers, scores)
+  sources/          # Adapters: adzuna, arbeitnow, remoteok, himalayas, ats_boards
+  pipeline/         # Search (sync) and scoring (run_score)
+  matching/         # Skill taxonomy (aliases), signal extraction, scoring
+```
+
+## Privacy
+- `.env (API keys)`` and ``data/`` (personal job listings) are included in .gitignore: they are **not** committed to the repository.
+- The only personal data tracked by Git is ``config/master_cv.yaml``.
+  
+# [ESPAÑOL]
 
 Agente personal de aplicación de empleo (CLI + SQLite). Busca ofertas en fuentes
 gratuitas, las puntúa con un motor de matching (0-100), genera un CV tailorizado
@@ -139,5 +274,4 @@ src/jobpilot/
 ## Privacidad
 
 - `.env` (claves) y `data/` (ofertas personales) están en `.gitignore`: **no se suben**.
-- El único dato personal que se versiona es `config/master_cv.yaml`. Si vas a hacer
-  el repositorio público, valora usar un CV de ejemplo o mantenerlo privado.
+- El único dato personal que se versiona es `config/master_cv.yaml`.
