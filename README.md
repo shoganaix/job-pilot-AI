@@ -149,6 +149,7 @@ por oferta y mantiene una cola de aplicaciones.
 > comercial. El motor de búsqueda usa APIs sin coste (keyless o con clave gratuita).
 
 ## Qué hace
+<img width="519" height="175" alt="image" src="https://github.com/user-attachments/assets/0f178ab6-b5cd-45a1-b7c9-fe6d0db865b7" />
 
 | Comando | Qué hace |
 |---|---|
