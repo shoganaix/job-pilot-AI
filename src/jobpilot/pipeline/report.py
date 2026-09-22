@@ -151,6 +151,18 @@ def _cv_cell(row) -> str:
     return f'<a href="{_esc(cv)}">{_esc(p.name)}</a>'
 
 
+def _age(iso: Any, unit: str = "d") -> str:
+    """Days (or hours) since an ISO timestamp, as a compact string."""
+    try:
+        dt = datetime.fromisoformat(str(iso))
+    except (TypeError, ValueError):
+        return "?"
+    days = (datetime.now(dt.tzinfo) - dt).total_seconds() / 86_400
+    if unit == "h" and days < 1:
+        return f"{int(days * 24)}h"
+    return f"{int(days)}d"
+
+
 def _queue_table(apps: list) -> str:
     if not apps:
         return (
@@ -170,12 +182,14 @@ def _queue_table(apps: list) -> str:
             f"<td class='num'>{row['offer_id']}</td>"
             f"<td>{_esc(row['company'] or '')}</td><td>{title_cell}</td>"
             f"<td>{cv_cell}</td>"
+            f"<td>{_esc(row['applied_on'] or '')}</td>"
+            f"<td>{_age(row['updated_at'])}</td>"
             f"<td>{_esc(row['notes'] or '')}</td>"
             f"<td>{_esc(row['updated_at'] or '')}</td></tr>"
         )
     head = (
         "<tr><th>estado</th><th>id</th><th>empresa</th><th>posición</th>"
-        "<th>cv</th><th>notas</th><th>actualizado</th></tr>"
+        "<th>cv</th><th>aplicado</th><th>antigüedad</th><th>notas</th><th>actualizado</th></tr>"
     )
     return f"<table>{head}{''.join(body)}</table>"
 

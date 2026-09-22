@@ -5,6 +5,7 @@
     jobpilot plan        dry-run: show exactly what a sync would call
     jobpilot sync        run the multi-source search and store offers
     jobpilot offers      list stored offers
+    jobpilot query <text>  full-text search over stored offers
     jobpilot queue       show the application queue
     jobpilot queue set <id> --status <s>   move an offer through the pipeline
     jobpilot open <id>   open an offer in the browser
@@ -19,6 +20,7 @@ import argparse
 import shutil
 import sys
 import webbrowser
+from datetime import datetime
 from pathlib import Path
 
 from rich.console import Console
@@ -35,6 +37,30 @@ from .models import AppStatus
 
 RESOURCES = Path(__file__).parent / "resources"
 CONSOLE = Console()
+
+_QUEUE_HINTS: dict[str, str] = {
+    "new": "puntúa con jobpilot score y decide si entra en la cola",
+    "review": "jobpilot cv <id> y decide: aplicar o descartar",
+    "apply": "aplica con jobpilot open <id>; luego marca applied",
+    "applied": "haz seguimiento; marca interviewing cuando avance",
+    "interviewing": "prepara las entrevistas; marca offer o rejected al saber el resultado",
+    "offer": "negocia y acepta",
+    "rejected": "fin del pipeline; guarda el feedback en --notes si lo hay",
+    "discarded": "fin del pipeline",
+    "withdrawn": "fin del pipeline",
+}
+
+
+def _age(iso: str) -> str:
+    """Human 'time in current status', e.g. 5d / 3h."""
+    try:
+        dt = datetime.fromisoformat(iso)
+    except (TypeError, ValueError):
+        return "?"
+    days = (datetime.now(dt.tzinfo) - dt).total_seconds() / 86_400
+    if days < 1:
+        return f"{int(days * 24)}h"
+    return f"{int(days)}d"
 
 
 # --------------------------------------------------------------------------- #
@@ -62,6 +88,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--source", action="append", default=None)
     p.add_argument("--limit", type=int, default=40)
     p.add_argument("--has-description", action="store_true", help="only offers with full description")
+
+    p = sub.add_parser("query", help="search stored offers by text")
+    p.add_argument("text")
+    p.add_argument("--limit", type=int, default=20)
 
     p = sub.add_parser("queue", help="show the application queue")
     p.add_argument("set", nargs="?", help="offer id to update")
@@ -119,6 +149,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         return _cmd_sync(args)
     if args.command == "offers":
         return _cmd_offers(args)
+    if args.command == "query":
+        return _cmd_query(args)
     if args.command == "queue":
         return _cmd_queue(args)
     if args.command == "open":
@@ -312,6 +344,26 @@ def _cmd_offers(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_query(args: argparse.Namespace) -> int:
+    config = load_config()
+    from . import storage
+
+    conn = storage.connect(config.db_path)
+    rows = storage.search_offers(conn, args.text, limit=args.limit)
+    if not rows:
+        CONSOLE.print(f"[yellow]Sin resultados para {args.text!r}. Ejecuta `jobpilot sync` para ampliar el corpus.[/]")
+        return 0
+    table = Table(title=f"Búsqueda: {args.text} ({len(rows)})")
+    for col in ("id", "fuente", "empresa", "título", "ubicación", "familia"):
+        table.add_column(col)
+    for row in rows:
+        table.add_row(str(row["id"]), row["source"], row["company"], row["title"],
+                      row["location"], row["family"] or "")
+    CONSOLE.print(table)
+    CONSOLE.print("Usa [bold]jobpilot cv <id>[/] para generar el CV de una de estas ofertas.")
+    return 0
+
+
 def _cmd_queue(args: argparse.Namespace) -> int:
     config = load_config()
     from . import storage
@@ -340,12 +392,20 @@ def _cmd_queue(args: argparse.Namespace) -> int:
         CONSOLE.print("[yellow]Cola vacía. Usa `jobpilot queue set <id> --status apply|review|…`[/]")
         return 0
     table = Table(title="Cola de aplicaciones" + (f" ({args.status})" if args.status else ""))
-    for col in ("id", "estado", "empresa", "título", "cv", "notas"):
+    for col in ("id", "estado", "empresa", "título", "cv", "antigüedad", "aplicado", "notas"):
         table.add_column(col)
     for row in rows:
+        applied = row["applied_on"] or "-"
         table.add_row(str(row["offer_id"]), row["status"], row["company"],
-                      row["title"], row["cv_file"] or "-", row["notes"] or "-")
+                      row["title"], row["cv_file"] or "-",
+                      _age(row["updated_at"]), applied, row["notes"] or "-")
     CONSOLE.print(table)
+
+    present = {r["status"] for r in rows if r["status"] in _QUEUE_HINTS}
+    if present:
+        CONSOLE.print("\nSiguiente paso:")
+        for status in sorted(present):
+            CONSOLE.print(f"  [bold]{status:<12}[/] {_QUEUE_HINTS[status]}")
     return 0
 
 

@@ -165,6 +165,26 @@ def test_score_offer_low_skills_cannot_apply():
     assert res["triage"] is not Triage.APPLY
 
 
+def test_skills_dimension_no_longer_crushes_short_postings():
+    config = load_config()
+    family = config.family("robotics")
+    offer = _offer(description="Junior Robotics Engineer using ROS2, C++ and Python.")
+    res = score_offer(offer, family, config)
+    skills = res["breakdown"]["skills"]
+    # covering most of what a short posting asks must score high (old formula: ~24)
+    assert skills["value"] >= 70
+    assert "demand=100%" in skills["evidence"]
+
+
+def test_skills_dimension_single_weak_hit_stays_low():
+    config = load_config()
+    family = config.family("test_validation")
+    offer = _offer(title="Administrative Assistant",
+                   description="Office assistant. MS Office and Excel, no engineering.")
+    res = score_offer(offer, family, config)
+    assert res["breakdown"]["skills"]["value"] < 15
+
+
 def test_extract_offer_signals_complete():
     config = load_config()
     offer = _offer(description="Junior role, 2+ years, C++.", location="Madrid, Spain")

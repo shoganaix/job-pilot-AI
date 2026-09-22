@@ -46,6 +46,13 @@ def _alias_variants(name: str) -> set[str]:
 
 
 def _skills_dimension(found_skills: dict[str, float], family, config: Config) -> dict[str, Any]:
+    """Skills coverage of the offer's *asked* skills, weighted by what we master.
+
+    The old formula scaled by ``found_weight/total_weight`` so a short posting
+    citing a handful of skills could never reach a decent value. Now coverage
+    of what the offer asks dominates, and the demand factor only ramps down
+    postings that cite very little of the family's domain (<20% of its weight).
+    """
     total_weight = sum(family.skills.values()) or 1.0
     have = master_skill_variants(config)
     found_aliases = {s: set(_alias_variants(s)) for s in found_skills}
@@ -60,10 +67,12 @@ def _skills_dimension(found_skills: dict[str, float], family, config: Config) ->
     found_weight = sum(found_skills.values())
     found_ratio = found_weight / total_weight if found_skills else 0.0
     covered_ratio = covered_weight / found_weight if found_weight else 0.0
-    value = 100.0 * found_ratio * (0.5 + 0.5 * covered_ratio)
+    demand_factor = min(1.0, found_ratio / 0.20)
+    value = 100.0 * covered_ratio * demand_factor
     evidence = (
         f"{len(found_skills)} skill hits "
-        f"({found_weight:.0f}/{total_weight:.0f} domain weight), covered={covered_ratio:.0%}"
+        f"({found_weight:.0f}/{total_weight:.0f} domain weight), "
+        f"covered={covered_ratio:.0%}, demand={demand_factor:.0%}"
         + (f"; sin cubrir: {', '.join(missing[:6])}" if missing else "")
     )
     return {"value": round(value, 1), "evidence": evidence}

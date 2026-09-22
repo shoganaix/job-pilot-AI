@@ -75,6 +75,8 @@ CREATE TABLE IF NOT EXISTS applications (
     cv_file    TEXT NOT NULL DEFAULT '',
     notes      TEXT NOT NULL DEFAULT '',
     url        TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT '',
+    applied_on TEXT NOT NULL DEFAULT '',
     updated_at TEXT NOT NULL
 );
 
@@ -92,11 +94,21 @@ def _now() -> str:
     return datetime.now(UTC).isoformat(timespec="seconds")
 
 
+def _ensure_application_columns(conn: sqlite3.Connection) -> None:
+    """Add the queue tracking columns to pre-2.0 databases (idempotent)."""
+    cols = {r["name"] for r in conn.execute("PRAGMA table_info(applications)").fetchall()}
+    for name in ("created_at", "applied_on"):
+        if name not in cols:
+            conn.execute(f"ALTER TABLE applications ADD COLUMN {name} TEXT NOT NULL DEFAULT ''")
+    conn.commit()
+
+
 def connect(db_path: Path) -> sqlite3.Connection:
     db_path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     conn.executescript(_SCHEMA)
+    _ensure_application_columns(conn)
     return conn
 
 
@@ -259,6 +271,35 @@ def count_offers(conn: sqlite3.Connection) -> int:
     return conn.execute("SELECT COUNT(*) AS n FROM offers").fetchone()["n"]
 
 
+def search_offers(conn: sqlite3.Connection, text: str, limit: int = 40) -> list[sqlite3.Row]:
+    """Case-insensitive search across title, company, location, category,
+    description and assigned families. Every whitespace-separated term must hit."""
+    terms = [t for t in text.split() if t]
+    if not terms:
+        return []
+    clauses: list[str] = []
+    params: list[str] = []
+    for term in terms:
+        like = f"%{term}%"
+        clauses.append(
+            "(o.title LIKE ? COLLATE NOCASE OR o.company LIKE ? COLLATE NOCASE "
+            "OR o.location LIKE ? COLLATE NOCASE OR o.category LIKE ? COLLATE NOCASE "
+            "OR o.description LIKE ? COLLATE NOCASE OR EXISTS ("
+            "SELECT 1 FROM offer_families f WHERE f.offer_id = o.id "
+            "AND f.family LIKE ? COLLATE NOCASE))"
+        )
+        params += [like] * 6
+    params.append(limit)
+    sql = (
+        "SELECT o.*, "
+        "(SELECT GROUP_CONCAT(f.family) FROM offer_families f WHERE f.offer_id = o.id) AS family "
+        "FROM offers o WHERE "
+        + " AND ".join(clauses)
+        + " ORDER BY o.id DESC LIMIT ?"
+    )
+    return conn.execute(sql, params).fetchall()
+
+
 # --------------------------------------------------------------------------- #
 # Application queue
 # --------------------------------------------------------------------------- #
@@ -270,18 +311,29 @@ def set_application(
     notes: str = "",
     cv_variant: str = "",
     cv_file: str = "",
+    applied_on: str = "",
 ) -> None:
     offer = get_offer(conn, offer_id)
     if offer is None:
         raise KeyError(f"offer {offer_id} not found")
+    existing = get_application(conn, offer_id)
+    now = _now()
+    created_at = existing["created_at"] if existing and existing["created_at"] else now
+    if not applied_on and existing and existing["applied_on"]:
+        applied_on = existing["applied_on"]
+    if status is AppStatus.APPLIED and not applied_on:
+        applied_on = datetime.now(UTC).date().isoformat()
     conn.execute(
-        """INSERT INTO applications (offer_id, status, cv_variant, cv_file, notes, url, updated_at)
-           VALUES (?,?,?,?,?,?,?)
+        """INSERT INTO applications
+             (offer_id, status, cv_variant, cv_file, notes, url, created_at, applied_on, updated_at)
+           VALUES (?,?,?,?,?,?,?,?,?)
            ON CONFLICT(offer_id) DO UPDATE SET
              status=excluded.status, cv_variant=excluded.cv_variant,
              cv_file=excluded.cv_file, notes=excluded.notes, url=excluded.url,
+             created_at=excluded.created_at, applied_on=excluded.applied_on,
              updated_at=excluded.updated_at""",
-        (offer_id, status.value, cv_variant, cv_file, notes, offer["apply_url"] or offer["url"], _now()),
+        (offer_id, status.value, cv_variant, cv_file, notes,
+         offer["apply_url"] or offer["url"], created_at, applied_on, now),
     )
     conn.commit()
 
@@ -297,7 +349,8 @@ def list_applications(
 ) -> list[sqlite3.Row]:
     sql = """
         SELECT a.offer_id, a.status, a.cv_variant, a.cv_file, a.notes,
-               a.url, a.updated_at, o.title, o.company, o.location,
+               a.url, a.created_at, a.applied_on, a.updated_at,
+               o.title, o.company, o.location,
                o.apply_url, o.url AS offer_url, o.description
         FROM applications a JOIN offers o ON o.id = a.offer_id
     """

@@ -44,10 +44,65 @@ def test_application_queue(tmp_path):
     assert len(rows) == 1
     assert rows[0]["status"] == "apply"
     assert rows[0]["notes"] == "strength: ROS"
+    assert rows[0]["created_at"] and rows[0]["applied_on"] == ""
 
     storage.set_application(conn, oid, AppStatus.APPLIED)
     rows = storage.list_applications(conn, statuses=[AppStatus.APPLY])
     assert rows == []
+    applied = storage.get_application(conn, oid)
+    assert applied["applied_on"]  # stamped automatically on apply
+    first_created = applied["created_at"]
+    assert first_created
+
+    # applied_on and created_at are preserved across later transitions
+    storage.set_application(conn, oid, AppStatus.REJECTED)
+    later = storage.get_application(conn, oid)
+    assert later["applied_on"] == applied["applied_on"]
+    assert later["created_at"] == first_created
+    conn.close()
+
+
+def test_connect_migrates_old_applications_schema(tmp_path):
+    import sqlite3
+
+    db = temp_db_path(tmp_path)
+    raw = sqlite3.connect(db)
+    raw.executescript(
+        "CREATE TABLE applications ("
+        "  offer_id INTEGER PRIMARY KEY, status TEXT NOT NULL DEFAULT 'new',"
+        "  cv_variant TEXT NOT NULL DEFAULT '', cv_file TEXT NOT NULL DEFAULT '',"
+        "  notes TEXT NOT NULL DEFAULT '', url TEXT NOT NULL DEFAULT '',"
+        "  updated_at TEXT NOT NULL);"
+        "INSERT INTO applications (offer_id, updated_at) VALUES (99, '2026-01-01T00:00:00+00:00');"
+    )
+    raw.commit()
+    raw.close()
+
+    conn = storage.connect(db)  # migration must add created_at/applied_on
+    row = storage.get_application(conn, 99)
+    assert row["created_at"] == "" and row["applied_on"] == ""
+    conn.close()
+
+
+def test_search_offers(tmp_path):
+    conn = storage.connect(temp_db_path(tmp_path))
+    run = storage.run_start(conn)
+    offers = [
+        Offer(source="adzuna", source_id="a1", title="Senior Robotics Engineer",
+              company="ACME", location="Madrid", family="robotics",
+              description="ROS2 and SLAM for ground vehicles."),
+        Offer(source="adzuna", source_id="a2", title="Frontend Dev",
+              company="ACME", location="Madrid"),
+        Offer(source="adzuna", source_id="a3", title="Robotics Intern",
+              company="Beta", location="Remote", family="robotics"),
+    ]
+    storage.upsert_offers(conn, run.id, offers)
+    assert len(storage.search_offers(conn, "robotics")) == 2  # title + family match
+    assert len(storage.search_offers(conn, "slam")) == 1  # description match
+    assert len(storage.search_offers(conn, "acme")) == 2  # company match
+    assert len(storage.search_offers(conn, "robotics madrid")) == 1  # AND across terms
+    assert storage.search_offers(conn, "zzz") == []
+    assert storage.search_offers(conn, "   ") == []
     conn.close()
 
 

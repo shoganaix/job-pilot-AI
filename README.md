@@ -109,6 +109,14 @@ cv_es = config.master("es")   # All narrative fields resolved to Spanish (defaul
 
 The generated CV language is determined by `languages[0]` unless explicitly overridden with `--lang`.
 
+## Application queue (2.0)
+
+`jobpilot queue` tracks each application with `created_at`, `applied_on` (stamped automatically when a job moves to `applied`), how long it has been in its current status and a suggested next step per status. Filter the board with `--status X`.
+
+## Scoring calibration
+
+The **skills dimension** rewards how much of the offer's *asked* skills you cover, and normalizes short postings instead of crushing them: an offer citing only 2-3 skills of the family domain is no longer penalized for the tiny share it represents. Tune the gate keepers in `profile.yaml` → `scoring` (`threshold`, `min_skills_for_apply`, `weights`).
+
 ## HTML Dashboard
 
 `jobpilot report` renders a self-contained `output/report.html` (no external assets) with KPI cards, the application queue, the latest scoring run, a score breakdown for the top offers and a per-family summary. Use `--open` to view it in your browser, or `--family X` to filter the scoring tables.
@@ -284,7 +292,18 @@ aplicaciones, las mejores posiciones del último run con desglose de scoring
 - `jobpilot queue set <id> --status apply --cv-file output/cv/cv_<id>_<lang>.md`
   enlaza el CV generado en la cola y el report lo muestra como link.
 - `jobpilot queue --status apply` filtra la cola por estado.
+- La cola guarda `created_at` (cuando entró) y `applied_on` (fecha de aplicación,
+  se rellena sola al pasar a `applied`), muestra la antigüedad por estado y
+  sugiere el siguiente paso.
+- El report muestra esas fechas y la antigüedad en la tabla de la cola.
 - `--open` abre el report en el navegador; `--family X` filtra las tablas de scoring.
+
+## Calibración del scoring
+
+La dimensión **skills** premia cuánto cubres las skills que *pide* la oferta y ya
+no castiga a los postings cortos (una oferta que cita 2-3 skills del dominio de la
+familia ya no recibe un valor mínimo por su escasa representación). Ajusta
+`threshold`, `min_skills_for_apply` y `weights` en `profile.yaml` → `scoring`.
 
 ## Desarrollo
 
