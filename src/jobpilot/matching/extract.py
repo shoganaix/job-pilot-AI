@@ -125,27 +125,15 @@ def extract_location(offer: Offer, profile: ProfileConfig) -> dict[str, Any]:
     """Resolve the offer's location to the best matching profile preference."""
     loc = (offer.location or "").lower()
     words = set(re.findall(r"[a-záéíóúñü]+", loc))
-
-    def is_remote() -> bool:
-        if "remote" in words or "anywhere" in words or "work from anywhere" in loc:
-            return True
-        # Trust the structured flag, except remoteok sets it on everything.
-        return bool(offer.remote) and offer.source != "remoteok"
-
-    def is_spain() -> bool:
-        if "port of" in loc:  # Port of Spain, Trinidad is NOT Spain
-            return False
-        return bool({"spain", "madrid", "barcelona", "valencia", "zaragoza"} & words)
-
-    country = (offer.country or "").lower()
     eu_codes = set(EU_COUNTRIES.values())
+    country = (offer.country or "").lower()
 
-    if is_remote():
+    if is_remote_offer(offer):
         eu = (country in eu_codes) or bool(words & set(EU_COUNTRIES))
         area = "Remote EU" if eu else "Remote global"
         weight = _pref_weight(profile, "remote", area.lower(), 90.0 if eu else 60.0)
         kind = "remote"
-    elif is_spain():
+    elif is_spain_offer(offer):
         area = "Spain"
         weight = _pref_weight(profile, "onsite", "spain", 85.0)
         kind = "onsite"
@@ -161,6 +149,56 @@ def extract_location(offer: Offer, profile: ProfileConfig) -> dict[str, Any]:
         "remote": kind == "remote",
         "onsite": kind == "onsite",
     }
+
+
+_ACCENTS = str.maketrans({"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ñ": "n", "ü": "u"})
+
+
+def _plain(text: str) -> str:
+    return (text or "").lower().translate(_ACCENTS)
+
+
+# Spanish city/region hints (accent-insensitive) so on-site Spanish postings are
+# recognized even when Adzuna writes them fully in Spanish ("España, Cataluña...").
+_SPAIN_HINTS = (
+    "espa", "spain", "madrid", "barcelona", "valencia", "zaragoza", "bilbao",
+    "sevilla", "malaga", "galicia", "catalu", "andaluc", "asturias", "canaria",
+    "girona", "vizcaya", "vasc", "granada", "murcia", "palma", "tenerife",
+)
+
+# Explicit "remote for sure" markers scanned in location+description (helps
+# German/UK postings like "100 % Home-Office"). "Híbrido"/"hybrid" is NOT enough.
+_REMOTE_FULL_RE = re.compile(r"100\s*%\s*home[-\s]?office|100\s*%\s*remote|fully (remote|home[-\s]?office)")
+
+
+def is_remote_offer(offer: Offer) -> bool:
+    """True when the posting is (explicitly) fully remote."""
+    loc = (offer.location or "").lower()
+    words = set(re.findall(r"[a-záéíóúñü]+", loc))
+    if "remote" in words or "anywhere" in words or "work from anywhere" in loc:
+        return True
+    # Trust the structured flag, except remoteok sets it on everything.
+    if bool(offer.remote) and offer.source != "remoteok":
+        return True
+    return bool(_REMOTE_FULL_RE.search(_plain(loc + " " + _text(offer))))
+
+
+def is_spain_offer(offer: Offer) -> bool:
+    loc = _plain(offer.location or "")
+    if "port of" in loc:  # Port of Spain, Trinidad is NOT Spain
+        return False
+    return any(hint in loc for hint in _SPAIN_HINTS)
+
+
+def foreign_relocation_reason(offer: Offer) -> str | None:
+    """Reason to drop a posting the user cannot attend in person.
+
+    Keep 100 % remote offers anywhere and any posting in Spain; exclude foreign
+    hybrid/on-site roles (the user cannot relocate).
+    """
+    if is_remote_offer(offer) or is_spain_offer(offer):
+        return None
+    return "no es 100% remoto y no está en España"
 
 
 def _pref_weight(profile: ProfileConfig, kind: str, contains: str, default: float) -> float:

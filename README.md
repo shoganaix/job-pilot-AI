@@ -65,6 +65,7 @@ All settings are managed through YAML files, without modifying the source code.
 ### `config/profile.yaml`
 
 - **`search`** — Search locations (`adzuna_country`), `target_offers`, and per-query limits.
+- **`search.exclude_foreign_onsite`** — when `true` (default), hybrid/on-site postings **outside Spain** are dropped at ingestion and scoring (you cannot relocate!); 100 % remote roles from any country and any posting in Spain are kept. Set `false` for hybrid/on-site in the UK/Germany too.
 - **`families`** — Groups your target job roles. Each family includes:
   - `queries`: Search phrases sent to each job source.
   - `sources`: `adzuna, arbeitnow, remoteok, himalayas` (+ ATS boards).
@@ -219,6 +220,10 @@ Todo se edita en YAML, sin tocar código:
 ### `config/profile.yaml`
 
 - **`search`** — ubicaciones (`adzuna_country`), `target_offers`, límites por query.
+- **`search.exclude_foreign_onsite`** — en `true` (por defecto) descarta en la ingesta y el
+  scoring las ofertas **híbridas o presenciales fuera de España** (¡no puedes
+  trasladarte!): se mantienen las 100% remoto de cualquier país y todo lo de
+  España. Pon `false` solo si quieres también híbridas/presenciales UK/Alemania.
 - **`families`** — agrupa tus roles objetivo. Cada familia tiene:
   - `queries`: frases que se envían a cada fuente.
   - `sources`: `adzuna, arbeitnow, remoteok, himalayas` (+ boards ATS).

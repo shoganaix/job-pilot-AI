@@ -56,6 +56,7 @@ class SearchConfig:
     target_offers: int = 300
     max_results_per_query: int = 50
     max_pages_per_query: int = 2
+    exclude_foreign_onsite: bool = True  # drop hybrid/on-site roles outside Spain
     locations: list[SearchLocation] = field(default_factory=list)
 
 
@@ -204,6 +205,7 @@ def parse_search(raw: dict) -> SearchConfig:
         target_offers=int(raw.get("target_offers", 300)),
         max_results_per_query=int(raw.get("max_results_per_query", 50)),
         max_pages_per_query=int(raw.get("max_pages_per_query", 2)),
+        exclude_foreign_onsite=bool(raw.get("exclude_foreign_onsite", True)),
         locations=locs,
     )
 
