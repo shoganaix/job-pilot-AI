@@ -1,0 +1,19 @@
+[
+  {
+    "id": "lev-ev-9087",
+    "text": "Avionics Test Engineer",
+    "company": "SpaceCo",
+    "hostedUrl": "https://jobs.lever.co/spaceco/lev-ev-9087",
+    "createdAt": 1725134400000,
+    "descriptionPlain": "Integration and test of avionics boards; write automated test scripts in Python.",
+    "categories": {
+      "location": "El Segundo, CA",
+      "allLocations": ["El Segundo, CA", "Remote"],
+      "team": "Avionics",
+      "commitment": "Full-time",
+      "type": "full_time"
+    },
+    "workplaceType": "remote",
+    "salaryRange": { "min": 100000, "max": 150000, "currency": "USD" }
+  }
+]

@@ -1,0 +1,31 @@
+[
+  {
+    "notice": "Please link to remoteok.com when using this feed. Jobs fetched from this feed are for display purposes only."
+  },
+  {
+    "id": "rok-1",
+    "position": "Computer Vision Engineer",
+    "company": "VisionAI Robotics",
+    "tags": ["python", "opencv", "deep-learning", "robot"],
+    "location": "Remote",
+    "salary_min": 90000,
+    "salary_max": 130000,
+    "date": "2026-09-01",
+    "description": "<p>We build robots that see. You will work on <b>OpenCV</b>, PyTorch and real-time perception.</p>",
+    "url": "/job/rok-1",
+    "apply_url": "https://remoteok.com/l/rok-1"
+  },
+  {
+    "id": "rok-2",
+    "position": "Frontend Developer React",
+    "company": "Widgets & Co",
+    "tags": ["react", "typescript", "css"],
+    "location": "Remote",
+    "salary_min": 70000,
+    "salary_max": 95000,
+    "date": "2026-08-30",
+    "description": "<p>Build marketing websites with joy.</p>",
+    "url": "/job/rok-2",
+    "apply_url": "https://remoteok.com/l/rok-2"
+  }
+]

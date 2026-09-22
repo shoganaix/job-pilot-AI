@@ -1,0 +1,15 @@
+{
+  "jobs": [
+    {
+      "id": 4477,
+      "title": "Vehicle Test Engineer",
+      "company_name": "Red Rover Motors",
+      "location": { "name": "Cape Canaveral, FL", "country": "USA" },
+      "absolute_url": "https://boards.greenhouse.io/redrover/jobs/4477",
+      "content": "<p>Own verification and <b>validation</b> of vehicle avionics and drive systems.</p>",
+      "updated_at": "2026-09-02T12:00:00Z",
+      "first_published": "2026-08-01T12:00:00Z"
+    }
+  ],
+  "meta": { "total": 1 }
+}

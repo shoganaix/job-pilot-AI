@@ -1,0 +1,37 @@
+{
+  "jobs": [
+    {
+      "id": "him-1",
+      "title": "Robotics Engineer (ROS2)",
+      "company": "Autobot Labs",
+      "location": "Germany",
+      "country": "DE",
+      "url": "https://himalayas.app/jobs/him-1",
+      "applyUrl": "https://himalayas.app/apply/him-1",
+      "description": "Design a real-time perception stack for mobile robots using C++ and ROS2.",
+      "salaryMin": 70000,
+      "salaryMax": 95000,
+      "salaryCurrency": "EUR",
+      "seniority": ["mid", "senior"],
+      "tags": ["ros2", "c++", "robotics"],
+      "postedAt": "2026-09-01T00:00:00Z"
+    },
+    {
+      "id": "him-2",
+      "title": "Accountant",
+      "company": "Num Services",
+      "location": "Portugal",
+      "country": "PT",
+      "url": "https://himalayas.app/jobs/him-2",
+      "applyUrl": "https://himalayas.app/apply/him-2",
+      "description": "Bookkeeping for SaaS clients.",
+      "salaryMin": 30000,
+      "salaryMax": 38000,
+      "salaryCurrency": "EUR",
+      "seniority": ["junior"],
+      "tags": ["accounting"],
+      "postedAt": "2026-08-31T00:00:00Z"
+    }
+  ],
+  "total": 1288
+}

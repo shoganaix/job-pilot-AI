@@ -1,0 +1,36 @@
+{
+  "data": [
+    {
+      "slug": "embedded-systems-berlin-4471",
+      "company_name": "RoboWorks GmbH",
+      "title": "Embedded Systems Engineer (m/f/d)",
+      "description": "<p>Right in the middle of Berlin we build autonomous driving stacks.</p><ul><li>C, RTOS, CAN</li><li>Python tooling</li></ul>",
+      "remote": true,
+      "url": "https://www.arbeitnow.com/jobs/embedded-systems-berlin-4471",
+      "tags": ["embedded", "c", "rtos", "autonomous-driving"],
+      "job_types": ["fulltime"],
+      "location": "Berlin, Germany",
+      "salary": "60000€ - 75000€",
+      "created_at": "2026-09-01T08:00:00Z",
+      "views": 120,
+      "likes": 4
+    },
+    {
+      "slug": "cafe-barista-munich-208",
+      "company_name": "Cafe Kette",
+      "title": "Barista (m/w/d)",
+      "description": "<p>Kaffeekultur in Muenchen.</p>",
+      "remote": false,
+      "url": "https://www.arbeitnow.com/jobs/cafe-barista-munich-208",
+      "tags": ["barista"],
+      "job_types": ["fulltime"],
+      "location": "Munich, Germany",
+      "salary": "28000€",
+      "created_at": "2026-08-30T08:00:00Z",
+      "views": 9,
+      "likes": 0
+    }
+  ],
+  "links": { "next": "https://www.arbeitnow.com/api/job-board-api?page=2", "previous": null },
+  "meta": { "page": 1, "count": 100, "total": 342 }
+}
