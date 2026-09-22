@@ -1,8 +1,10 @@
 # =============================================================
-# CV MASTER — perfil real de María Soriano (Español).
-# El motor de matching (Fase 2) y la generación de CV (Fase 3)
-# leerán este fichero. Los grupos de "skills" bajo un título que
-# contenga "camino" cuentan a factor 0.5 en el scoring (en curso).
+# CV MASTER — perfil real de María Soriano (bilingüe es/en).
+# Los campos narrativos se guardan como {es, ...}, {en, ...}.
+# `config.master(lang)` los resuelve de forma determinista;
+# los skills/contacto son lenguaje-neutral y no se traducen.
+# Los grupos de "skills" bajo un título que contenga "camino"
+# cuentan a factor 0.5 en el scoring (en curso).
 # =============================================================
 contact:
   name: "María Soriano"
@@ -13,47 +15,65 @@ contact:
   github: "github.com/shoganaix"
   website: ""
 
-summary: |
-  Perfil técnico híbrido con formación en desarrollo de software, electrónica,
-  automatización y simulación. Experiencia en desarrollo de aplicaciones
-  interactivas con Unity/C#, prototipado y creación de activos CAD para
-  simuladores industriales y sanitarios. Actualmente profundizo en electrónica y
-  sistemas de control. Busco incorporarme a un entorno de desarrollo e
-  ingeniería orientado a la integración hardware-software, la automatización
-  industrial, los sistemas de control y las soluciones tecnológicas conectadas.
+summary:
+  es: |
+    Perfil técnico híbrido con formación en desarrollo de software, electrónica,
+    automatización y simulación. Experiencia en desarrollo de aplicaciones
+    interactivas con Unity/C#, prototipado y creación de activos CAD para
+    simuladores industriales y sanitarios. Actualmente profundizo en electrónica y
+    sistemas de control. Busco incorporarme a un entorno de desarrollo e
+    ingeniería orientado a la integración hardware-software, la automatización
+    industrial, los sistemas de control y las soluciones tecnológicas conectadas.
+  en: |
+    Hybrid technical profile with training in software development, electronics,
+    automation and simulation. Experience building interactive applications with
+    Unity/C#, prototyping and creating CAD assets for industrial and healthcare
+    simulators. Currently deepening my skills in electronics and control systems.
+    Looking to join a development and engineering environment focused on
+    hardware-software integration, industrial automation, control systems and
+    connected technology solutions.
 
 experience:
   - company: "Gammera Nest"
-    role: "Instructora de programación"
+    role: { es: "Instructora de programación", en: "Programming Instructor" }
     start: "2024"
     end: "2025"
     bullets:
-      - "Impartición de talleres de programación, desarrollo de videojuegos y herramientas digitales."
+      - { es: "Impartición de talleres de programación, desarrollo de videojuegos y herramientas digitales.",
+          en: "Taught programming, game development and digital tools workshops." }
   - company: "Wild Alchemist Studio"
-    role: "Desarrolladora de software"
+    role: { es: "Desarrolladora de software", en: "Software Developer" }
     start: "2023"
     end: "2024"
     bullets:
-      - "Desarrollo de aplicaciones interactivas y software educativo con Unity y C#, programación de mecánicas y prototipado."
+      - { es: "Desarrollo de aplicaciones interactivas y software educativo con Unity y C#, programación de mecánicas y prototipado.",
+          en: "Built interactive applications and educational software with Unity and C#, implementing game mechanics and prototyping." }
   - company: "Vsion Studios"
-    role: "Técnico 3D y simulación"
+    role: { es: "Técnico 3D y simulación", en: "3D & Simulation Technician" }
     start: "2020"
     end: "2021"
     bullets:
-      - "Creación y optimización de modelos 3D para simuladores industriales y sanitarios."
+      - { es: "Creación y optimización de modelos 3D para simuladores industriales y sanitarios.",
+          en: "Created and optimized 3D models for industrial and healthcare simulators." }
 
 education:
-  - degree: "Microgrado en Electrónica e Ingeniería de Automatización Industrial"
+  - degree:
+      es: "Microgrado en Electrónica e Ingeniería de Automatización Industrial"
+      en: "Certificate in Electronics and Industrial Automation Engineering"
     school: "UNED"
     start: "2025"
     end: "2026"
-    note: "Parcialmente cursado"
-  - degree: "Formación en programación (Common Core completado)"
+    note: { es: "Parcialmente cursado", en: "Partially completed" }
+  - degree:
+      es: "Formación en programación (Common Core completado)"
+      en: "Programming training (Common Core completed)"
     school: "42 Madrid"
     start: "2022"
     end: "2025"
-    note: "Certificación RNCP nivel 6 en curso"
-  - degree: "Grado en Diseño y Desarrollo de Videojuegos"
+    note: { es: "Certificación RNCP nivel 6 en curso", en: "RNCP level 6 certification in progress" }
+  - degree:
+      es: "Grado en Diseño y Desarrollo de Videojuegos"
+      en: "Bachelor's Degree in Game Design and Development"
     school: "UDIT, Madrid"
     start: "2018"
     end: "2022"
@@ -66,19 +86,30 @@ skills:
   Transversales: [Testing, Documentación técnica, Scrum, Inglés C1/C2, Español nativo]
 
 projects:
-  - name: "Simulador de control de actitud de CubeSat"
+  - name: { es: "Simulador de control de actitud de CubeSat",
+             en: "CubeSat attitude control simulator" }
     url: ""
-    description: "Simulación de dinámica y orientación, control en lazo cerrado y procesamiento de datos de sensores (Python, MATLAB/Simulink). En desarrollo."
-  - name: "Prototipos de robótica"
+    description:
+      es: "Simulación de dinámica y orientación, control en lazo cerrado y procesamiento de datos de sensores (Python, MATLAB/Simulink). En desarrollo."
+      en: "Simulation of dynamics and attitude, closed-loop control and sensor data processing (Python, MATLAB/Simulink). In development."
+  - name: { es: "Prototipos de robótica", en: "Robotics prototypes" }
     url: ""
-    description: "Robot hexápodo con cámara y control móvil, brazo mecánico y prototipo de competición (Arduino, C/C++)."
-  - name: "Software y datos"
+    description:
+      es: "Robot hexápodo con cámara y control móvil, brazo mecánico y prototipo de competición (Arduino, C/C++)."
+      en: "Hexapod robot with camera and mobile control, mechanical arm and competition prototype (Arduino, C/C++)."
+  - name: { es: "Software y datos", en: "Software and data" }
     url: ""
-    description: "Desarrollo de software en C, C++ y Python, aplicaciones web interactivas y gestión de bases de datos SQL/MySQL."
-  - name: "Modelado y simulación de control"
+    description:
+      es: "Desarrollo de software en C, C++ y Python, aplicaciones web interactivas y gestión de bases de datos SQL/MySQL."
+      en: "Software development in C, C++ and Python, interactive web applications and SQL/MySQL database management."
+  - name: { es: "Modelado y simulación de control", en: "Control modelling and simulation" }
     url: ""
-    description: "Modelado de sistemas dinámicos y análisis de su respuesta mediante simulación (MATLAB/Simulink)."
+    description:
+      es: "Modelado de sistemas dinámicos y análisis de su respuesta mediante simulación (MATLAB/Simulink)."
+      en: "Modelling of dynamic systems and analysis of their response through simulation (MATLAB/Simulink)."
 
 certifications:
-  - name: "Certificación RNCP nivel 6 (42 Madrid) — en curso"
+  - name:
+      es: "Certificación RNCP nivel 6 (42 Madrid) — en curso"
+      en: "RNCP level 6 certification (42 Madrid) — in progress"
     year: "2026"
