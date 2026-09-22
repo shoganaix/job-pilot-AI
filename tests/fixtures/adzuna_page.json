@@ -1,0 +1,31 @@
+{
+  "count": 98,
+  "results_per_page": 50,
+  "results": [
+    {
+      "id": "adz-1001",
+      "title": "Robotics Software Engineer",
+      "company": { "display_name": "Tecnología de Robots SL" },
+      "location": { "area": ["Madrid", "Community of Madrid", "Spain"], "country": "ESP" },
+      "description": "Robotica movil, ROS2 y Python. Desarrollo de software de navegacion.",
+      "salary_min": 32000,
+      "salary_max": 44000,
+      "category": { "label": "IT Jobs" },
+      "created": "2026-09-01T10:00:00Z",
+      "redirect_url": "https://www.adzuna.es/land/ad/1001",
+      "company_url": "https://example.com"
+    },
+    {
+      "id": "adz-1002",
+      "title": "Senior Software Engineer",
+      "company": { "display_name": "Banco Ejemplo" },
+      "location": { "area": ["Barcelona", "Catalonia", "Spain"], "country": "ESP" },
+      "description": "Desarrollo backend Java en banca, 10+ anios de experiencia requeridos.",
+      "salary_min": 55000,
+      "salary_max": 75000,
+      "category": { "label": "IT Jobs" },
+      "created": "2026-08-28T09:00:00Z",
+      "redirect_url": "https://www.adzuna.es/land/ad/1002"
+    }
+  ]
+}

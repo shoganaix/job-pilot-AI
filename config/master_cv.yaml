@@ -1,0 +1,84 @@
+# =============================================================
+# CV MASTER — perfil real de María Soriano (Español).
+# El motor de matching (Fase 2) y la generación de CV (Fase 3)
+# leerán este fichero. Los grupos de "skills" bajo un título que
+# contenga "camino" cuentan a factor 0.5 en el scoring (en curso).
+# =============================================================
+contact:
+  name: "María Soriano"
+  email: "soriano.palacios.maria@gmail.com"
+  phone: "+34 615 113 140"
+  city: "Madrid, España"
+  linkedin: "linkedin.com/in/maria-soriano-palacios"
+  github: "github.com/shoganaix"
+  website: ""
+
+summary: |
+  Perfil técnico híbrido con formación en desarrollo de software, electrónica,
+  automatización y simulación. Experiencia en desarrollo de aplicaciones
+  interactivas con Unity/C#, prototipado y creación de activos CAD para
+  simuladores industriales y sanitarios. Actualmente profundizo en electrónica y
+  sistemas de control. Busco incorporarme a un entorno de desarrollo e
+  ingeniería orientado a la integración hardware-software, la automatización
+  industrial, los sistemas de control y las soluciones tecnológicas conectadas.
+
+experience:
+  - company: "Gammera Nest"
+    role: "Instructora de programación"
+    start: "2024"
+    end: "2025"
+    bullets:
+      - "Impartición de talleres de programación, desarrollo de videojuegos y herramientas digitales."
+  - company: "Wild Alchemist Studio"
+    role: "Desarrolladora de software"
+    start: "2023"
+    end: "2024"
+    bullets:
+      - "Desarrollo de aplicaciones interactivas y software educativo con Unity y C#, programación de mecánicas y prototipado."
+  - company: "Vsion Studios"
+    role: "Técnico 3D y simulación"
+    start: "2020"
+    end: "2021"
+    bullets:
+      - "Creación y optimización de modelos 3D para simuladores industriales y sanitarios."
+
+education:
+  - degree: "Microgrado en Electrónica e Ingeniería de Automatización Industrial"
+    school: "UNED"
+    start: "2025"
+    end: "2026"
+    note: "Parcialmente cursado"
+  - degree: "Formación en programación (Common Core completado)"
+    school: "42 Madrid"
+    start: "2022"
+    end: "2025"
+    note: "Certificación RNCP nivel 6 en curso"
+  - degree: "Grado en Diseño y Desarrollo de Videojuegos"
+    school: "UDIT, Madrid"
+    start: "2018"
+    end: "2022"
+
+skills:
+  Lenguajes: [C, C++, Python, C#, JavaScript, SQL/MySQL, PHP, HTML, CSS]
+  Motores/Herramientas: [Unity, Unreal Engine, Git, GitHub, Docker, Linux/UNIX, Visual Studio, MATLAB, Simulink, TCP/IP, Construct]
+  CAD y modelado 3D: [Autodesk Inventor, Blender, 3ds Max, ZBrush]
+  En camino (robótica/embedded): [ROS, ROS2, microcontroladores, Arduino, ESP32, STM32, Raspberry Pi, UART, I2C, SPI, CAN, OpenCV, PCB (KiCad), RoboDK]
+  Transversales: [Testing, Documentación técnica, Scrum, Inglés C1/C2, Español nativo]
+
+projects:
+  - name: "Simulador de control de actitud de CubeSat"
+    url: ""
+    description: "Simulación de dinámica y orientación, control en lazo cerrado y procesamiento de datos de sensores (Python, MATLAB/Simulink). En desarrollo."
+  - name: "Prototipos de robótica"
+    url: ""
+    description: "Robot hexápodo con cámara y control móvil, brazo mecánico y prototipo de competición (Arduino, C/C++)."
+  - name: "Software y datos"
+    url: ""
+    description: "Desarrollo de software en C, C++ y Python, aplicaciones web interactivas y gestión de bases de datos SQL/MySQL."
+  - name: "Modelado y simulación de control"
+    url: ""
+    description: "Modelado de sistemas dinámicos y análisis de su respuesta mediante simulación (MATLAB/Simulink)."
+
+certifications:
+  - name: "Certificación RNCP nivel 6 (42 Madrid) — en curso"
+    year: "2026"
