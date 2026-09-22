@@ -32,6 +32,15 @@ families:
       - "Junior Robotics Engineer"
       - "Autonomous Systems"
       - "Rover"
+    adzuna_queries:
+      es:
+        - "robótica"
+        - "vehículos autónomos"
+      de:
+        - "Robotik Ingenieur"
+        - "Robotik"
+        - "Autonome Systeme"
+        - "Autonome Fahrzeuge"
     sources: [adzuna, arbeitnow, remoteok, himalayas]
     skills:
       ros: 9
@@ -56,6 +65,15 @@ families:
       - "Embedded Software Engineer"
       - "Embedded Systems Engineer"
       - "Firmware Engineer"
+    adzuna_queries:
+      es:
+        - "sistemas embebidos"
+        - "firmware"
+      de:
+        - "Embedded Software Engineer"
+        - "Embedded Systems"
+        - "Firmwareentwickler"
+        - "Eingebettete Systeme"
     sources: [adzuna, arbeitnow, remoteok, himalayas]
     skills:
       c: 9
@@ -83,6 +101,15 @@ families:
       - "Electronics Test Engineer"
       - "PCB Design Engineer"
       - "Hardware Engineer"
+    adzuna_queries:
+      es:
+        - "electrónica"
+        - "electrónico"
+      de:
+        - "Elektronikingenieur"
+        - "Elektronik"
+        - "PCB Design"
+        - "Hardwareentwickler"
     sources: [adzuna, arbeitnow, remoteok, himalayas]
     skills:
       electronics: 8
@@ -106,6 +133,14 @@ families:
       - "Test Engineer"
       - "AIT Engineer"
       - "AIV Engineer"
+    adzuna_queries:
+      es:
+        - "pruebas"
+        - "testing"
+      de:
+        - "Testingenieur"
+        - "Test und Validierung"
+        - "Validierungsingenieur"
     sources: [adzuna, arbeitnow, remoteok, himalayas]
     skills:
       testing: 8
@@ -130,6 +165,16 @@ families:
       - "Avionics Engineer"
       - "Space Systems Engineer"
       - "Satellite Engineer"
+    adzuna_queries:
+      es:
+        - "aviónica"
+        - "aeroespacial"
+      de:
+        - "Systemingenieur"
+        - "Avionik"
+        - "Raumfahrt"
+        - "Satellit"
+        - "GNC"
     sources: [adzuna, arbeitnow, remoteok, himalayas]
     skills:
       "systems engineering": 8
@@ -153,6 +198,16 @@ families:
       - "Automation Engineer"
       - "Controls Engineer"
       - "Robotics Automation"
+    adzuna_queries:
+      es:
+        - "control de procesos"
+        - "automática"
+        - "automatización"
+      de:
+        - "Automatisierungsingenieur"
+        - "Automatisierung"
+        - "Regelungstechnik"
+        - "Steuerungstechnik"
     sources: [adzuna, arbeitnow, remoteok, himalayas]
     skills:
       plc: 6
@@ -173,6 +228,17 @@ families:
       - "Python Developer"
       - "Computer Vision Engineer"
       - "Software Engineer"
+    adzuna_queries:
+      es:
+        - "desarrollador de software"
+        - "software"
+        - "python"
+        - "visión artificial"
+      de:
+        - "Python Entwickler"
+        - "Softwareentwickler"
+        - "Computer Vision"
+        - "Deep Learning"
     sources: [adzuna, arbeitnow, remoteok, himalayas]
     skills:
       python: 9

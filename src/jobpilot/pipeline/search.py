@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import time
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
@@ -25,6 +25,16 @@ class PlannedQuery:
     source: str
     location: SearchLocation
     query: str
+
+    @property
+    def queries(self) -> list[str]:
+        """Queries to run for this slot: country-localized for Adzuna when the
+        profile provides them (e.g. Spanish terms for Spain), else the base set."""
+        if self.source == "adzuna" and self.location.adzuna_country:
+            localized = self.family.adzuna_queries.get(self.location.adzuna_country)
+            if localized:
+                return localized
+        return self.family.queries
 
 
 @dataclass
@@ -75,8 +85,9 @@ def plan(config: Config, sources: dict[str, JobSource]) -> list[PlannedQuery]:
                 continue
             src = sources[src_name]
             for location in resolve_locations(src, config, family):
-                for query in family.queries:
-                    planned.append(PlannedQuery(family=family, source=src_name, location=location, query=query))
+                slot = PlannedQuery(family=family, source=src_name, location=location, query="")
+                for query in slot.queries:
+                    planned.append(replace(slot, query=query))
     return planned
 
 
@@ -180,7 +191,8 @@ def run_sync(
                     pool_key = (src_name, location.name)
                     if pool_key not in scroll_pools:
                         scroll_pools[pool_key] = fetch_scroll_pages(src, location)
-                    for query in family.queries:
+                    slot = PlannedQuery(family=family, source=src_name, location=location, query="")
+                    for query in slot.queries:
                         for page in scroll_pools[pool_key]:
                             matched = [
                                 offer for offer in page.offers
@@ -189,7 +201,8 @@ def run_sync(
                             if matched:
                                 store_offers(src_name, matched, family.id, query)
                     continue
-                for query in family.queries:
+                slot = PlannedQuery(family=family, source=src_name, location=location, query="")
+                for query in slot.queries:
                     page = 1
                     while True:
                         try:

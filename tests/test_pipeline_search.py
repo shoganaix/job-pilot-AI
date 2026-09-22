@@ -14,7 +14,7 @@ from jobpilot.config import (
     parse_master_cv,
 )
 from jobpilot.models import Offer
-from jobpilot.pipeline.search import guess_family, run_sync
+from jobpilot.pipeline.search import guess_family, plan, run_sync
 
 from ._util import FakeSource
 
@@ -66,6 +66,25 @@ def test_sync_persists_and_snapshots(tmp_path):
     assert (snap / "manifest.json").exists()
     assert (snap / "manifest.json").read_text(encoding="utf-8").find("total_inserted") != -1
     conn.close()
+
+
+def test_plan_adzuna_uses_country_localized_queries(tmp_path):
+    cfg = _config(tmp_path)
+    cfg.families[0].adzuna_queries["es"] = ["ingeniero de robótica"]
+    cfg.families[0].sources = ["adzuna"]
+    cfg.families[1].sources = []  # only robotics to keep the assertion tight
+    planned = plan(cfg, {"adzuna": FakeSource(offers=[])})
+    assert len(planned) == 1
+    assert planned[0].query == "ingeniero de robótica"
+    assert planned[0].location.adzuna_country == "es"
+
+
+def test_plan_adzuna_falls_back_to_english_queries(tmp_path):
+    cfg = _config(tmp_path)
+    cfg.families[0].sources = ["adzuna"]
+    cfg.families[1].sources = []
+    planned = plan(cfg, {"adzuna": FakeSource(offers=[])})
+    assert [q.query for q in planned] == ["Robotics Engineer"]
 
 
 def test_sync_dry_run_does_not_persist(tmp_path):

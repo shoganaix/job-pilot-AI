@@ -26,6 +26,20 @@ def test_adzuna_search():
     assert offer.apply_url
 
 
+def test_adzuna_drops_non_tech_categories():
+    src = AdzunaSource(app_id="x", app_key="y")
+    raw = [
+        {"id": "t1", "title": "Nursery Practitioner",
+         "category": {"label": "Teaching Jobs"}, "company": {"display_name": "X"}, "location": {"area": []}},
+        {"id": "t2", "title": "Camare r a", "category": {"label": "Stellen aus Gastronomie & Catering"},
+         "company": {"display_name": "X"}, "location": {"area": []}},
+        {"id": "t3", "title": "Eng de robótica", "category": {"label": "Engineering Jobs"},
+         "company": {"display_name": "ACME"}, "location": {"area": ["Spain", "Madrid"]}},
+    ]
+    offers = src.parse_offers(raw)
+    assert [o.title for o in offers] == ["Eng de robótica"]
+
+
 def test_arbeitnow_search():
     src = ArbeitnowSource()
     src._get_json = lambda url, params=None, headers=None: fixture("arbeitnow_page.json")

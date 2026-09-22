@@ -73,6 +73,7 @@ class FamilyConfig:
     search_locations: list[str] = field(default_factory=list)  # names (subset of search.locations)
     skills: dict[str, float] = field(default_factory=dict)  # keyword -> score contribution
     seniority_hint: str = ""  # e.g. "junior"
+    adzuna_queries: dict[str, list[str]] = field(default_factory=dict)  # ISO-2 country -> queries
 
 
 # --------------------------------------------------------------------------- #
@@ -223,6 +224,10 @@ def parse_families(raw: list) -> list[FamilyConfig]:
                 search_locations=list(item.get("search_locations", [])),
                 skills={k: float(v) for k, v in (item.get("skills") or {}).items()},
                 seniority_hint=item.get("seniority_hint", ""),
+                adzuna_queries={
+                    ccode: [str(q) for q in queries]
+                    for ccode, queries in (item.get("adzuna_queries") or {}).items()
+                },
             )
         )
     if not families:

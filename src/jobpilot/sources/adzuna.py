@@ -16,6 +16,30 @@ from .base import JobSource, SourceUnavailable, html_to_text
 
 API = "https://api.adzuna.com/v1/api"
 
+# Adzuna returns very broad "category.label" values; the free feed mixes in
+# non-engineering sectors (hospitality, sales, admin, ...). Drop those at
+# ingestion so the corpus stays signal-rich. Matching is done on the lowercase
+# label; the tech-ish sectors (Engineering, IT, Techniker, QA/Wissenschaft,
+# Manufacturing, Graduate, Energy) are kept.
+_NON_TECH_CATEGORIES = frozenset({
+    "admin jobs", "administraci",
+    "atención al cliente", "customer services",
+    "limpieza", "cleaning", "cleaning jobs",
+    "gastronom", "restauraci", "hotel", "hospitality & catering",
+    "maintenance jobs", "wartung",
+    "sales jobs", "ventas",
+    "hr & recruitment", "recursos humanos", "personal & personal", "verwaltungsstellen",
+    "buchhaltung", "finanzwesen", "accounting", "finance",
+    "jurist", "legal",
+    "logistics", "logistik", "lagerhalt", "almacén", "warehouse",
+    "marketing", "publicidad", "pr, advertising",
+    "nursing", "pflege", "healthcare", "gesundheitswesen",
+    "teaching", "social work", "sozial",
+    "trade & construction", "handel & bau",
+    "sonstige/allgemeine", "otros trabajos", "part time jobs",
+    "kreation & design", "creación & design",
+})
+
 
 class AdzunaSource(JobSource):
     name = "adzuna"
@@ -64,6 +88,9 @@ class AdzunaSource(JobSource):
     def parse_offers(self, raw: list) -> list[Offer]:
         offers = []
         for item in raw:
+            category = (item.get("category") or {}).get("label", "") if isinstance(item.get("category"), dict) else ""
+            if any(block in category.lower() for block in _NON_TECH_CATEGORIES):
+                continue
             raw_min = item.get("salary_min")
             raw_max = item.get("salary_max")
             salary_min = float(raw_min) if isinstance(raw_min, (int, float)) else None
