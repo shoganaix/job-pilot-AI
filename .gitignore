@@ -13,6 +13,7 @@ dist/
 
 # Local data (never commit personal job data)
 data/
+output/
 
 # OS
 .DS_Store

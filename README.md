@@ -17,6 +17,7 @@ Personal AI-powered job application agent (CLI + SQLite). Searches for job oppor
 | `jobpilot query <text>` | Searches through previously stored job listings |
 | `jobpilot queue set <id> --status apply` | Adds a job opportunity to your application queue |
 | `jobpilot open <id>` | Opens the job listing URL in your browser |
+| `jobpilot cv <id>` | Generates the tailored CV (markdown + PDF) into `output/cv/` |
 
 ### Scoring and triage
 
@@ -155,6 +156,7 @@ por oferta y mantiene una cola de aplicaciones.
 | `jobpilot query <text>` | Busca ofertas ya guardadas |
 | `jobpilot queue set <id> --status apply` | Añade una oferta a tu cola de aplicaciones |
 | `jobpilot open <id>` | Abre la URL de la oferta en el navegador |
+| `jobpilot cv <id>` | Genera el CV tailorizado (markdown + PDF) en `output/cv/` |
 
 Triage del scoring:
 - **apply** → score ≥ 65 (y relevancia de skills mínima) → aplicar.
@@ -251,6 +253,20 @@ cv_es = config.master("es")   # a español (idioma por defecto)
 
 El idioma del CV generado se elige por `languages[0]` a menos que pases `--lang`.
 
+## CV tailorizado (`jobpilot cv`)
+
+Genera un CV adaptado a cada oferta en `output/cv/cv_<id>_<lang>.md` y
+`output/cv/cv_<id>_<lang>.pdf`:
+
+- **Backend LLM** (por defecto): construye un prompt con tu `master_cv` + la
+  descripción de la oferta y redacta el CV vía `opencode run --format json`
+(backend `complete_json`). Si falla, cae al backend heurístico.
+- **Backend heurístico** (`--no-llm`): reordena tus `skills` según las señaladas
+  en la oferta (grupos `En camino` con factor 0.5) y las experiencias afines,
+  sin texto inventado.
+- `--lang es|en` fuerza idioma; `--show` imprime el markdown; `--no-pdf` omite el
+  PDF; `--family X` restringe skills al conjunto de esa familia.
+
 ## Desarrollo
 
 ```bash
@@ -264,14 +280,17 @@ Estructura:
 src/jobpilot/
   cli.py            # CLI (argparse + rich)
   config.py         # carga YAML + resolver bilingüe (MasterCV.in_lang)
+  llm.py            # backend LLM (opencode run --format json) + extract_json
   models.py         # tipos Offer, SourcePage, Triage...
   storage.py        # SQLite (upsert, dedupe, ofertas, scores)
   sources/          # adaptadores: adzuna, arbeitnow, remoteok, himalayas, ats_boards
-  pipeline/         # search (sync) y score (run_score)
+  pipeline/         # search (sync), score (run_score) y cv (tailor + render)
   matching/         # taxonomy (variantes de skills), extract (señales), scoring
 ```
 
 ## Privacidad
 
-- `.env` (claves) y `data/` (ofertas personales) están en `.gitignore`: **no se suben**.
-- El único dato personal que se versiona es `config/master_cv.yaml`.
+- `.env` (claves), `data/` (ofertas personales) y `output/` (CVs generados) están
+  en `.gitignore`: **no se suben**.
+- El único dato personal que se versiona es `config/master_cv.yaml`. Si vas a hacer
+  el repositorio público, valora usar un CV de ejemplo o mantenerlo privado.

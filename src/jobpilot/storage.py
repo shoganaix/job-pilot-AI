@@ -208,7 +208,9 @@ def upsert_offers(conn: sqlite3.Connection, run_id: int, offers: list[Offer]) ->
 
 def get_offer(conn: sqlite3.Connection, offer_id: int) -> sqlite3.Row | None:
     return conn.execute(
-        "SELECT * FROM offers WHERE id = ?", (offer_id,)
+        "SELECT o.*, (SELECT GROUP_CONCAT(f.family) FROM offer_families f "
+        "WHERE f.offer_id = o.id) AS family FROM offers o WHERE o.id = ?",
+        (offer_id,),
     ).fetchone()
 
 
