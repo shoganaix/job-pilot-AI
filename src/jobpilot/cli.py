@@ -77,9 +77,17 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--show", type=int, default=5, help="rows shown per triage")
     p.add_argument("--details", action="store_true", help="print dimension breakdown")
 
-    for name in ("cv", "report"):
-        p = sub.add_parser(name, help=f"({name} module) ")
-        p.add_argument("--family")
+    p = sub.add_parser("cv", help="generate a tailored CV for an offer")
+    p.add_argument("id", type=int, help="offer id (see `jobpilot offers`)")
+    p.add_argument("--lang", choices=["es", "en"], default=None, help="CV language")
+    p.add_argument("--family", default=None, help="force the family to tailor against")
+    p.add_argument("--no-llm", action="store_true", help="deterministic heuristic, skip the LLM")
+    p.add_argument("--no-pdf", action="store_true", help="skip the PDF export")
+    p.add_argument("--model", default=None, help="opencode model (provider/model)")
+    p.add_argument("--show", action="store_true", help="print the generated markdown")
+
+    p = sub.add_parser("report", help="(report module) ")
+    p.add_argument("--family")
 
     return parser
 
@@ -114,8 +122,7 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.command == "score":
         return _cmd_score(args)
     if args.command == "cv":
-        CONSOLE.print("[yellow]cv[/]: tailleur de CV llega en Fase 3.")
-        return 0
+        return _cmd_cv(args)
     if args.command == "report":
         CONSOLE.print("[yellow]report[/]: dashboard HTML llega en Fase 4.")
         return 0
@@ -248,7 +255,7 @@ def _cmd_sync(args: argparse.Namespace) -> int:
             run_fin = storage.run_finish(conn, run, stats.to_dict())
             status.update(f"sync #{run_fin.id} en {elapsed:.1f}s")
 
-    table = Table(title="Resultado del sync" + (f" — run #{run.id}" if run else " (dry-run)"))
+    table = Table(title="Resultado del sync" + (f" - run #{run.id}" if run else " (dry-run)"))
     table.add_column("fuente")
     table.add_column("llamadas")
     table.add_column("ofertas vistas")
@@ -321,7 +328,7 @@ def _cmd_queue(args: argparse.Namespace) -> int:
         except KeyError as exc:
             CONSOLE.print(f"[red]{exc}[/]")
             return 1
-        CONSOLE.print(f"[green]oferta {offer_id} → {args.status}[/]")
+        CONSOLE.print(f"[green]oferta {offer_id} -> {args.status}[/]")
         return 0
 
     rows = storage.list_applications(conn)
@@ -363,7 +370,7 @@ def _cmd_score(args: argparse.Namespace) -> int:
 
     triage_styles = {Triage.APPLY.value: "green", Triage.REVIEW.value: "yellow", Triage.DISCARD.value: "red"}
 
-    summary = Table(title=f"Resultado del scoring — run #{run_fin.id}")
+    summary = Table(title=f"Resultado del scoring - run #{run_fin.id}")
     summary.add_column("triage")
     summary.add_column("nº")
     summary.add_column("%")
@@ -391,8 +398,50 @@ def _cmd_score(args: argparse.Namespace) -> int:
             table.add_row(str(row["offer_id"]), f"[{triage_styles[t.value]}]{row['score']:.0f}[/]",
                           row["company"], row["title"] or "", row["location"] or "")
         CONSOLE.print(table)
-    CONSOLE.print("Siguiente: `jobpilot cv` (Fase 3) para generar el CV tailorizado "
+    CONSOLE.print("Siguiente: `jobpilot cv <id>` para generar el CV tailorizado "
                   "o `jobpilot queue set <id> --status apply` para cargarlo en la cola.")
+    return 0
+
+
+def _cmd_cv(args: argparse.Namespace) -> int:
+    config = load_config()
+    from . import storage
+    from .pipeline.cv import CVError, generate_cv
+
+    conn = storage.connect(config.db_path)
+    try:
+        result = generate_cv(
+            config,
+            conn,
+            args.id,
+            lang=args.lang,
+            family_filter=args.family,
+            use_llm=not args.no_llm,
+            model=args.model,
+            to_pdf=not args.no_pdf,
+        )
+    except CVError as exc:
+        CONSOLE.print(f"[red]cv error:[/] {exc}")
+        return 1
+
+    meta, files = result["meta"], result["files"]
+    backend = meta["backend"]
+    if meta.get("fallback"):
+        backend += f" (fallback: {meta['fallback']})"
+    score = f"{meta['score']:.0f} ({meta['triage']})" if meta["score"] is not None else "sin puntuar"
+    table = Table(title=f"CV tailorizado - oferta {meta['offer_id']} [{meta['lang']}]")
+    table.add_column("campo")
+    table.add_column("valor")
+    table.add_row("familia", meta["family"])
+    table.add_row("puntuación", score)
+    table.add_row("backend", backend)
+    table.add_row("markdown", files.get("md", "-"))
+    table.add_row("pdf", files.get("pdf", meta.get("pdf_error", "-")))
+    CONSOLE.print(table)
+    if args.show:
+        CONSOLE.print("\n" + result["markdown"])
+    CONSOLE.print("Para cargarlo en la cola: "
+                  f"[bold]jobpilot queue set {meta['offer_id']} --status apply[/]")
     return 0
 
 
@@ -406,7 +455,7 @@ def _cmd_open(args: argparse.Namespace) -> int:
         CONSOLE.print(f"[red]oferta {args.id} no encontrada[/]")
         return 1
     url = row["apply_url"] or row["url"]
-    CONSOLE.print(f"Abrindo [bold]{row['company']} — {row['title']}[/]")
+    CONSOLE.print(f"Abrindo [bold]{row['company']} - {row['title']}[/]")
     CONSOLE.print(f"[dim]{url}[/]")
     webbrowser.open(url)
     return 0

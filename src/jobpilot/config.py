@@ -164,6 +164,7 @@ class Config:
     families: list[FamilyConfig]
     scoring: ScoringConfig
     profile: ProfileConfig
+    output_dir: Path = field(default_factory=lambda: Path("output"))
     ats_companies: dict[str, list[str]] = field(default_factory=dict)  # source -> [company slug]
 
     def family(self, family_id: str) -> FamilyConfig:
@@ -282,6 +283,7 @@ def load_config(profile_path: Path = DEFAULT_PROFILE) -> Config:
             min_skills_for_apply=float(raw.get("scoring", {}).get("min_skills_for_apply", 20.0)),
         ),
         profile=parse_profile(raw.get("profile", {}) or {}),
+        output_dir=Path(top.get("output_dir", "output")),
         ats_companies={
             key: [str(c) for c in (raw.get("ats_companies", {}).get(key) or [])]
             for key in ("greenhouse", "lever")

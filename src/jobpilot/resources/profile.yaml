@@ -4,6 +4,7 @@ project:
   db_path: data/jobpilot.db
   snapshot_dir: data/snapshots
   master_cv: config/master_cv.yaml
+  output_dir: output
 
 search:
   target_offers: 300
