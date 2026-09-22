@@ -48,6 +48,7 @@ def test_build_report_writes_escaped_html(tmp_path):
     assert "cv_1_en.md" in html
     assert "Junior ROS Engineer" in html
     assert "Resumen" in html and "Cola de aplicaciones" in html
+    assert "aplicado" in html and "antigüedad" in html  # queue 2.0 columns
     assert "Familias" in html
     assert "apply</span>" in html
     assert str(ids[0]) in html and str(ids[1]) in html
