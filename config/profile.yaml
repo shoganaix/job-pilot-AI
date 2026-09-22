@@ -11,6 +11,9 @@ search:
   target_offers: 300        # objetivo orientativo del sync
   max_results_per_query: 50 # max ofertas a guardar por (query, fuente)
   max_pages_per_query: 2    # páginas máximo por (query, fuente)
+  # Excluye ofertas híbridas/presenciales fuera de España (no puedes trasladarte);
+  # se mantienen: 100% remoto en cualquier país y todo lo que esté en España.
+  exclude_foreign_onsite: true
   locations:
     - { name: "Spain",   adzuna_country: "es" }
     - { name: "Germany", adzuna_country: "de" }
@@ -28,14 +31,35 @@ families:
     interest: 10
     queries:
       - "Robotics Engineer"
-      - "Robotics Software Engineer"
       - "Junior Robotics Engineer"
-      - "Autonomous Systems"
-      - "Rover"
+      - "Robotics Software Engineer"
+      - "Junior Robotics Software Engineer"
+      - "Robot Software Developer"
+      - "Robotics Developer"
+      - "Robotics Programmer"
+      - "Autonomous Systems Engineer"
+      - "Autonomous Mobile Robots"
+      - "Mobile Robotics"
+      - "Robot Control Engineer"
+      - "Robotics Simulation Engineer"
+      - "ROS Developer"
+      - "ROS2 Developer"
+      - "Robotics Graduate"
+      - "Robotics Internship"
+      - "Robotics Trainee"
     adzuna_queries:
       es:
         - "robótica"
         - "vehículos autónomos"
+        - "ingeniero robótica"
+        - "desarrollador robótica"
+        - "programador robótica"
+        - "software robótica"
+        - "robótica móvil"
+        - "sistemas autónomos"
+        - "ingeniero control robótico"
+        - "robótica junior"
+        - "prácticas robótica"
       de:
         - "Robotik Ingenieur"
         - "Robotik"
@@ -63,12 +87,28 @@ families:
     interest: 9
     queries:
       - "Embedded Software Engineer"
-      - "Embedded Systems Engineer"
+      - "Junior Embedded Software Engineer"
+      - "Embedded Software Developer"
+      - "Embedded C Developer"
+      - "Embedded C++ Developer"
       - "Firmware Engineer"
+      - "Junior Firmware Engineer"
+      - "Firmware Developer"
+      - "Embedded Systems Developer"
+      - "Microcontroller Programmer"
+      - "Embedded Linux Developer"
+      - "Embedded Software Graduate"
+      - "Embedded Software Internship"
     adzuna_queries:
       es:
+        - "software embebido"
         - "sistemas embebidos"
-        - "firmware"
+        - "sistemas empotrados"
+        - "programador firmware"
+        - "desarrollador firmware"
+        - "programador C embebido"
+        - "microcontroladores"
+        - "electrónica embebida"
       de:
         - "Embedded Software Engineer"
         - "Embedded Systems"
@@ -250,6 +290,145 @@ families:
       "clean code": 5
       "ci/cd": 5
       git: 5
+
+  - id: space_software
+    label: "Space Software & Satellite Systems"
+    weight: 1.0
+    interest: 10
+
+    queries:
+      - "Space Software Engineer"
+      - "Junior Space Software Engineer"
+      - "Satellite Software Engineer"
+      - "Flight Software Engineer"
+      - "Onboard Software Engineer"
+      - "Spacecraft Software Developer"
+      - "Ground Segment Software Engineer"
+      - "Mission Control Software Engineer"
+      - "Space Simulation Engineer"
+      - "Satellite Simulation Engineer"
+      - "Space Robotics Engineer"
+      - "Space Software Graduate"
+      - "Space Engineering Internship"
+
+    adzuna_queries:
+      es:
+        - "software espacial"
+        - "software satélites"
+        - "software aeroespacial"
+        - "simulación espacial"
+        - "software de vuelo"
+        - "ingeniería satélites"
+        - "software segmento terreno"
+
+      de:
+        - "Raumfahrt Software"
+        - "Satellitensoftware"
+        - "Flugsoftware"
+        - "Raumfahrt Softwareentwickler"
+
+    sources: [adzuna, arbeitnow, remoteok, himalayas]
+
+    skills:
+      python: 9
+      c++: 9
+      c: 8
+      simulation: 8
+      matlab: 7
+      simulink: 7
+      linux: 7
+      "flight software": 7
+      "attitude control": 7
+      "spacecraft": 6
+      "embedded software": 7
+
+  - id: simulation
+    label: "Simulation & Digital Twins"
+    weight: 1.0
+    interest: 9
+
+    queries:
+      - "Simulation Software Engineer"
+      - "Simulation Developer"
+      - "Junior Simulation Engineer"
+      - "Digital Twin Developer"
+      - "Digital Twin Engineer"
+      - "Robotics Simulation Developer"
+      - "Industrial Simulation Engineer"
+      - "Unity Simulation Developer"
+      - "Virtual Commissioning Engineer"
+      - "Modelling and Simulation Engineer"
+      - "Simulation Software Graduate"
+
+    adzuna_queries:
+      es:
+        - "desarrollador simulación"
+        - "ingeniero simulación"
+        - "gemelo digital"
+        - "simulación industrial"
+        - "simulación robótica"
+        - "modelado y simulación"
+
+      de:
+        - "Simulationsingenieur"
+        - "Simulationsentwickler"
+        - "Digitaler Zwilling"
+        - "Robotersimulation"
+
+    sources: [adzuna, arbeitnow, remoteok, himalayas]
+
+    skills:
+      simulation: 9
+      python: 8
+      c++: 8
+      c#: 7
+      unity: 8
+      matlab: 7
+      simulink: 7
+      cad: 6
+      robotics: 6
+
+  - id: mechatronics
+    label: "Mechatronics & Robotics Integration"
+    weight: 1.0
+    interest: 9
+
+    queries:
+      - "Mechatronics Engineer"
+      - "Junior Mechatronics Engineer"
+      - "Robotics Integration Engineer"
+      - "Hardware Software Integration Engineer"
+      - "Systems Integration Engineer"
+      - "Electromechanical Engineer"
+      - "Robot Integration Technician"
+      - "Mechatronics Graduate"
+
+    adzuna_queries:
+      es:
+        - "mecatrónica"
+        - "ingeniería mecatrónica"
+        - "integración robótica"
+        - "integración hardware software"
+        - "sistemas electromecánicos"
+
+      de:
+        - "Mechatronik"
+        - "Mechatronik Ingenieur"
+        - "Systemintegration"
+        - "Robotik Integration"
+
+    sources: [adzuna, arbeitnow, remoteok, himalayas]
+
+    skills:
+      robotics: 9
+      electronics: 8
+      python: 7
+      c++: 7
+      microcontroller: 7
+      hardware: 7
+      integration: 7
+      cad: 6
+      testing: 6
 
 # ------------------------------------------------------------------------- #
 # Scoring

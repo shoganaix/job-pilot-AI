@@ -19,7 +19,7 @@ from typing import Any
 
 from ..config import Config
 from ..models import Triage
-from .extract import extract_hard_filters, extract_offer_signals
+from .extract import extract_hard_filters, extract_offer_signals, foreign_relocation_reason
 
 _SENIORITY_RANK = {"lead": 20.0, "senior": 40.0, "midlevel": 70.0, "junior": 100.0, "entry": 100.0}
 
@@ -130,6 +130,10 @@ def score_offer(offer, family, config: Config) -> dict[str, Any]:
     """Score one offer against one family. Returns raw signals + dimensions."""
     signals = extract_offer_signals(offer, family, config)
     hard_filters = extract_hard_filters(offer, config)
+    if config.search.exclude_foreign_onsite:
+        relocation = foreign_relocation_reason(offer)
+        if relocation:
+            hard_filters.append(relocation)
     if hard_filters:
         triage = Triage.DISCARD
     w = config.scoring.weights

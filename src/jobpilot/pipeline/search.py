@@ -15,7 +15,8 @@ from typing import Any
 
 from .. import storage as store
 from ..config import Config, FamilyConfig, SearchLocation
-from ..models import Run, SourcePage
+from ..matching.extract import foreign_relocation_reason
+from ..models import Offer, Run, SourcePage
 from ..sources.base import JobSource, SourceError, SourceUnavailable, matches_query
 
 
@@ -148,13 +149,21 @@ def run_sync(
         stats.total_dupes += stored[2]
 
     def store_offers(source: str, offers: list, family_id: str, query: str) -> None:
+        stats.raw_rows[source] = stats.raw_rows.get(source, 0) + len(offers)
+        kept: list[Offer] = []
         for offer in offers:
+            if config.search.exclude_foreign_onsite:
+                if foreign_relocation_reason(offer):
+                    continue
             offer.family = offer.family or guess_family(config, offer, family_id)
             offer.query = query
-        if not dry_run and run_id:
-            stored = store.upsert_offers(conn, run_id, offers).get(source, [0, 0, 0])
-            record(source, offers, stored)
+            kept.append(offer)
         stats.seen_by_family[family_id] = stats.seen_by_family.get(family_id, 0) + len(offers)
+        if not kept:
+            return
+        if not dry_run and run_id:
+            stored = store.upsert_offers(conn, run_id, kept).get(source, [0, 0, 0])
+            record(source, kept, stored)
 
     def fetch_scroll_pages(
         src: JobSource, location: SearchLocation,

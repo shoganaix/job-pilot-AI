@@ -8,6 +8,9 @@ from jobpilot.matching.extract import (
     extract_location,
     extract_offer_signals,
     extract_skills,
+    foreign_relocation_reason,
+    is_remote_offer,
+    is_spain_offer,
 )
 from jobpilot.matching.scoring import score_offer
 from jobpilot.matching.taxonomy import (
@@ -25,7 +28,7 @@ def _offer(**kw) -> Offer:
         source_id="1",
         title="Test Engineer",
         company="Acme",
-        location="",
+        location="Madrid, Spain",
         description="",
     )
     defaults.update(kw)
@@ -127,6 +130,51 @@ def test_extract_location_remoteok_remote_flag_ignored():
     loc = extract_location(offer, config.profile)
     assert loc["kind"] == "onsite"
     assert loc["area"] == "Foreign"
+
+
+# --------------------------------------------------------------------------- #
+# relocation filter (100 % remote anywhere, or Spain; foreign hybrid/on-site out)
+
+
+def test_relocation_keeps_100pct_remote_eu():
+    offer = _offer(source="himalayas", remote=True, location="Germany", description="100% Remote")
+    assert is_remote_offer(offer)
+    assert foreign_relocation_reason(offer) is None
+
+
+def test_relocation_keeps_german_full_home_office():
+    offer = _offer(source="adzuna", location="UK, West Midlands, Birmingham",
+                   description="Software Test Engineer (m/w/d) - 100 % Home-Office möglich")
+    assert is_remote_offer(offer)
+    assert foreign_relocation_reason(offer) is None
+
+
+def test_relocation_keeps_spanish_locale_on_site():
+    offer = _offer(source="adzuna", location="España, Cataluña, Girona",
+                   description="Ingeniero de software (presencial)")
+    assert is_spain_offer(offer)
+    assert foreign_relocation_reason(offer) is None
+
+
+def test_relocation_drops_foreign_onsite():
+    offer = _offer(source="adzuna", location="UK, West Midlands, Birmingham",
+                   description="Full-time, on-site only")
+    assert foreign_relocation_reason(offer) is not None
+
+
+def test_relocation_drops_port_of_spain():
+    offer = _offer(source="remoteok", location="Port of Spain, Trinidad")
+    assert foreign_relocation_reason(offer) is not None
+
+
+def test_score_offer_discards_foreign_onsite():
+    config = load_config()
+    family = config.family("robotics")
+    offer = _offer(source="adzuna", location="UK, London",
+                   description="Junior Robotics Engineer using ROS2, C++ and Python. On-site.")
+    res = score_offer(offer, family, config)
+    assert res["triage"] is Triage.DISCARD
+    assert any("España" in f or "remoto" in f for f in res["hard_filters"])
 
 
 # --------------------------------------------------------------------------- #

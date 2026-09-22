@@ -10,6 +10,7 @@ search:
   target_offers: 300
   max_results_per_query: 50
   max_pages_per_query: 2
+  exclude_foreign_onsite: true  # keep only 100% remote (anywhere) or Spain
   locations:
     - { name: "Spain",   adzuna_country: "es" }
     - { name: "Germany", adzuna_country: "de" }

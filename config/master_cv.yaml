@@ -66,30 +66,31 @@ education:
 
 skills:
   Lenguajes: [C, C++, Python, C#, JavaScript, SQL/MySQL, PHP, HTML, CSS]
-  Motores/Herramientas: [Unity, Unreal Engine, Git, GitHub, Docker, Linux/UNIX, Visual Studio, MATLAB, Simulink, TCP/IP, Construct]
-  CAD y modelado 3D: [Autodesk Inventor, Blender, 3ds Max, ZBrush]
-  En camino (robótica/embedded): [ROS, ROS2, microcontroladores, Arduino, ESP32, STM32, Raspberry Pi, UART, I2C, SPI, CAN, OpenCV, PCB (KiCad), RoboDK]
+  Desarrollo de software: [Git, GitHub, Docker, Linux/UNIX, Visual Studio, TCP/IP]
+  CAD y modelado 3D: [Autodesk Inventor, Blender, 3ds Max, ZBrush, Unity, Unreal Engine, Construct]
+  Robótica y control: [microcontroladores, Arduino, ESP32, Raspberry Pi, UART, I2C, SPI, RoboDK, MATLAB, Simulink]
+  En camino: [ROS, ROS2, CAN, OpenCV, PCB (KiCad)]
   Transversales: [Testing, Documentación técnica, Scrum, Inglés C1/C2, Español nativo]
 
 projects:
   - name: { es: "Simulador de control de actitud de CubeSat",
              en: "CubeSat attitude control simulator" }
-    url: ""
+    url: "https://github.com/shoganaix/CubeSat-Attitude-Control-Simulator"
     description:
       es: "Simulación de dinámica y orientación, control en lazo cerrado y procesamiento de datos de sensores (Python, MATLAB/Simulink). En desarrollo."
       en: "Simulation of dynamics and attitude, closed-loop control and sensor data processing (Python, MATLAB/Simulink). In development."
   - name: { es: "Prototipos de robótica", en: "Robotics prototypes" }
-    url: ""
+    url: "https://github.com/shoganaix/robotics-lab"
     description:
       es: "Robot hexápodo con cámara y control móvil, brazo mecánico y prototipo de competición (Arduino, C/C++)."
       en: "Hexapod robot with camera and mobile control, mechanical arm and competition prototype (Arduino, C/C++)."
   - name: { es: "Software y datos", en: "Software and data" }
-    url: ""
+    url: "https://github.com/shoganaix/web-portfolio"
     description:
       es: "Desarrollo de software en C, C++ y Python, aplicaciones web interactivas y gestión de bases de datos SQL/MySQL."
       en: "Software development in C, C++ and Python, interactive web applications and SQL/MySQL database management."
   - name: { es: "Modelado y simulación de control", en: "Control modelling and simulation" }
-    url: ""
+    url: "https://github.com/shoganaix/control-systems-and-automation"
     description:
       es: "Modelado de sistemas dinámicos y análisis de su respuesta mediante simulación (MATLAB/Simulink)."
       en: "Modelling of dynamic systems and analysis of their response through simulation (MATLAB/Simulink)."
