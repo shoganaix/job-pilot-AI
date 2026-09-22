@@ -56,6 +56,8 @@ Adzuna remains disabled until valid credentials are provided in `.env`.
 
 It is the only source with a rate limit of 25 requests/minute and 250 requests/day, making it particularly useful for covering the Spanish job market.
 
+Adzuna posts largely local-language roles, so each family can declare `adzuna_queries` (per-country keyword sets, e.g. `es:` Spanish terms) — see `config/profile.yaml`. Offers are filtered at ingestion to drop clearly non-technical categories.
+
 ## Quick Configuration
 
 All settings are managed through YAML files, without modifying the source code.
@@ -204,6 +206,11 @@ ADZUNA_APP_KEY=
 
 Adzuna está deshabilitada hasta que completes el `.env` (es la única fuente con
 techo de 25 llamadas/min y 250/día, ideal para cubrir España).
+
+Adzuna publica sobre todo ofertas en el idioma local, así que cada familia puede
+declarar `adzuna_queries` (conjuntos de keywords por país, p. ej. `es:` términos
+en español) — ver `config/profile.yaml`. Las ofertas se filtran en la ingesta
+para descartar categorías claramente no técnicas.
 
 ## Configuración rápida
 
