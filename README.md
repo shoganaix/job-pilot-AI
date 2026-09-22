@@ -288,6 +288,10 @@ Genera un CV adaptado a cada oferta en `output/cv/cv_<id>_<lang>.md` y
 - **Backend LLM** (por defecto): construye un prompt con tu `master_cv` + la
   descripción de la oferta y redacta el CV vía `opencode run --format json`
 (backend `complete_json`). Si falla, cae al backend heurístico.
+
+La generación con IA reescribe y prioriza material del CV maestro para una oferta; **revisa siempre el resultado**. El prompt prohíbe inventar experiencia, pero la validación actual verifica principalmente la estructura, no todas las afirmaciones. 
+*Si prefieres una generación determinista sin LLM, usa `--no-llm`.*
+
 - **Backend heurístico** (`--no-llm`): reordena tus `skills` según las señaladas
   en la oferta (grupos `En camino` con factor 0.5) y las experiencias afines,
   sin texto inventado.
@@ -320,9 +324,25 @@ familia ya no recibe un valor mínimo por su escasa representación). Ajusta
 ## Desarrollo
 
 ```bash
-.\.venv\Scripts\ruff.exe check src tests
-.\.venv\Scripts\python.exe -m pytest
+  git clone https://github.com/shoganaix/job-pilot-AI.git
+  cd job-pilot-AI
+  python3 -m venv .venv
+  source .venv/bin/activate
+  python -m pip install -e ".[dev]"
+  jobpilot init
 ```
+Si ya has clonado el proyecto, entra en su carpeta, activa `.venv` y ejecuta `python -m pip install -e ".[dev]"` para actualizar la instalación editable. `jobpilot init` conserva los archivos de configuración existentes.
+
+```powershell
+git clone https://github.com/shoganaix/job-pilot-AI.git
+cd job-pilot-AI
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e ".[dev]"
+jobpilot init
+Copy-Item .env.example .env -ErrorAction SilentlyContinue
+```
+Si PowerShell bloquea la activación, puedes usar directamente `.\.venv\Scripts\python.exe -m pip install -e ".[dev]"` y `.\.venv\Scripts\jobpilot.exe <comando>`; no necesitas cambiar la política global de ejecución.
 
 Estructura:
 
@@ -337,7 +357,99 @@ src/jobpilot/
   pipeline/         # search (sync), score (run_score) y cv (tailor + render)
   matching/         # taxonomy (variantes de skills), extract (señales), scoring
 ```
+## 3. Ejemplo completo: desde arrancar hasta enviar una candidatura
 
+El ID `125` es **solo un ejemplo**. Sustitúyelo por un ID real que aparezca en tu base de datos. Los comandos se ejecutan dentro de la carpeta del repositorio, con el entorno virtual activado.
+
+```powershell
+# 0. En una sesión posterior, abre el proyecto y activa el entorno
+cd ruta\a\job-pilot-AI
+.\.venv\Scripts\Activate.ps1
+
+# 1. Revisa las fuentes y el plan
+jobpilot sources
+jobpilot plan
+
+# 2. Descarga ofertas y calcula su ajuste a tu CV
+jobpilot sync
+jobpilot score --show 10 --details
+
+# 3. Consulta los IDs; opcionalmente busca en las ofertas ya almacenadas
+jobpilot offers --limit 50 --has-description
+jobpilot query "robotics"
+
+# 4. Elige un ID REAL de la tabla. Ejemplo: 125
+jobpilot cv 125 --lang en --show
+
+# 5. Comprueba el PDF generado en output/cv/cv_125_en.pdf
+#    Revisa experiencia, tecnologías, titulaciones, idioma y contenido.
+
+# 6. Añade la oferta a la cola, asociando el CV generado
+jobpilot queue set 125 --status apply --cv-file "output/cv/cv_125_en.pdf"
+
+# 7. Abre la oferta en tu navegador
+jobpilot open 125
+
+# 8. PASO MANUAL: rellena el formulario de la empresa, adjunta el PDF,
+#    responde a las preguntas y pulsa Enviar. Comprueba la confirmación.
+
+# 9. SOLO DESPUÉS de haber enviado la candidatura, registra el estado
+jobpilot queue set 125 --status applied
+
+# 10. Consulta el seguimiento y abre el dashboard
+jobpilot queue
+jobpilot report --open
+```
+
+**Opción sin IA:** sustituye el paso 4 por `jobpilot cv 125 --lang en --no-llm --show`. Si la oferta está en español: `jobpilot cv 125 --lang es --no-llm`.
+
+**Atención al fichero del CV:** `--cv-file` asocia una ruta a la cola, pero no adjunta ese archivo a ningún formulario ni lo envía. El README anterior utilizaba la ruta `.md`; puedes asociar el PDF si ese es el documento que vas a presentar. El comando de apertura abre la URL de la oferta, no el PDF.
+
+## 4. Referencia completa de comandos y flags
+
+`<id>` significa ID entero de oferta; `<familia>` es el identificador exacto definido en `config/profile.yaml` (por ejemplo, `robotics`). Los flags que no aparecen bajo un comando no se aplican a él.
+
+| Comando | Flags/argumentos | Para qué sirven |
+|---|---|---|
+| `jobpilot init` | ninguno | Inicializa carpetas, configuración y SQLite sin sobrescribir la configuración existente. |
+| `jobpilot sources` | ninguno | Muestra fuentes habilitadas o deshabilitadas y el motivo. |
+| `jobpilot plan` | `--family <familia>` | Muestra solo el plan de una familia; sin flag, todas. |
+| `jobpilot sync` | `--family <familia>` | Descarga solo esa familia. |
+| | `--dry-run` | Consulta las fuentes sin persistir ofertas; **puede consumir llamadas API**. |
+| | `--source <fuente>` | Limita a una fuente; se puede repetir: `--source adzuna --source arbeitnow`. |
+| | `--max-pages <n>` | Sobrescribe el máximo de páginas por consulta. |
+| `jobpilot offers` | `--family <familia>` | Filtra por familia; se puede repetir. |
+| | `--source <fuente>` | Filtra por fuente; se puede repetir. |
+| | `--limit <n>` | Número máximo de filas (valor por defecto: 40). |
+| | `--has-description` | Solo ofertas con descripción completa. |
+| `jobpilot query <texto>` | `--limit <n>` | Busca texto en ofertas **ya guardadas** (por defecto: 20); no hace una nueva búsqueda web. |
+| `jobpilot score` | `--family <familia>` | Puntúa solo una familia. |
+| | `--limit <n>` | Limita el número de ofertas evaluadas. |
+| | `--show <n>` | Filas mostradas por categoría de triage (por defecto: 5). |
+| | `--details` | Muestra el desglose de las dimensiones de puntuación. |
+| `jobpilot cv <id>` | `--lang es` / `--lang en` | Fuerza idioma; sin flag usa el primer idioma de `profile.languages`. |
+| | `--family <familia>` | Fuerza la familia utilizada para adaptar el CV. |
+| | `--no-llm` | **No llama a IA**: usa el generador heurístico con el CV maestro. |
+| | `--no-pdf` | Genera Markdown pero omite la exportación a PDF. |
+| | `--model <proveedor/modelo>` | Indica el modelo de OpenCode para la generación con IA; no tiene efecto útil con `--no-llm`. |
+| | `--show` | Imprime el Markdown generado en la terminal. |
+| `jobpilot queue` | `--status <estado>` | Filtra la cola por estado. |
+| `jobpilot queue set <id>` | `--status <estado>` | Actualiza el estado local de la oferta; obligatorio al usar `set`. |
+| | `--notes <texto>` | Guarda una nota de seguimiento. |
+| | `--cv-file <ruta>` | Asocia la ruta del CV a la candidatura local. **No lo sube ni lo envía.** |
+| `jobpilot open <id>` | ninguno | Abre la URL de la oferta (URL de candidatura si está disponible). |
+| `jobpilot report` | `--family <familia>` | Filtra los datos del dashboard por familia. |
+| | `--out <ruta>` | Cambia la ruta del HTML (por defecto `output/report.html`). |
+| | `--open` | Abre el dashboard generado en el navegador. |
+
+Para la ayuda local y actualizada del código que tengas instalado:
+
+```bash
+jobpilot --help
+jobpilot cv --help
+jobpilot sync --help
+jobpilot queue --help
+```
 ## Privacidad
 
 - `.env` (claves), `data/` (ofertas personales) y `output/` (CVs generados) están
