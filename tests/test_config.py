@@ -35,7 +35,8 @@ def test_master_cv_bilingual_resolution():
     assert isinstance(es.summary, str) and isinstance(en.summary, str)
     assert es.summary != en.summary
     assert en.experience[0]["role"] == "Programming Instructor"
-    assert es.education[0]["degree"] == "Microgrado en Electrónica e Ingeniería de Automatización Industrial"
+    assert es.education[0]["degree"] == "Grado en Diseño y Desarrollo de Videojuegos"
+    assert len(es.certifications) == 2
     assert isinstance(en.projects[0]["description"], str)
     assert isinstance(en.certifications[0]["name"], str)
     # skills and contact stay language-neutral

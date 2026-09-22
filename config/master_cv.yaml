@@ -58,20 +58,6 @@ experience:
 
 education:
   - degree:
-      es: "Microgrado en Electrónica e Ingeniería de Automatización Industrial"
-      en: "Certificate in Electronics and Industrial Automation Engineering"
-    school: "UNED"
-    start: "2025"
-    end: "2026"
-    note: { es: "Parcialmente cursado", en: "Partially completed" }
-  - degree:
-      es: "Formación en programación (Common Core completado)"
-      en: "Programming training (Common Core completed)"
-    school: "42 Madrid"
-    start: "2022"
-    end: "2025"
-    note: { es: "Certificación RNCP nivel 6 en curso", en: "RNCP level 6 certification in progress" }
-  - degree:
       es: "Grado en Diseño y Desarrollo de Videojuegos"
       en: "Bachelor's Degree in Game Design and Development"
     school: "UDIT, Madrid"
@@ -110,6 +96,14 @@ projects:
 
 certifications:
   - name:
-      es: "Certificación RNCP nivel 6 (42 Madrid) — en curso"
-      en: "RNCP level 6 certification (42 Madrid) — in progress"
+      es: "Microgrado en Electrónica e Ingeniería de Automatización Industrial"
+      en: "Certificate in Electronics and Industrial Automation Engineering"
+    issuer: "UNED"
     year: "2026"
+    note: { es: "Parcialmente cursado", en: "Partially completed" }
+  - name:
+      es: "Formación en programación — Common Core completado (42 Madrid)"
+      en: "Programming training — Common Core completed (42 Madrid)"
+    issuer: "RNCP"
+    year: "2026"
+    note: { es: "Certificación RNCP nivel 6 en curso", en: "RNCP level 6 certification in progress" }
