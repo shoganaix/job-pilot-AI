@@ -10,7 +10,7 @@
     jobpilot open <id>   open an offer in the browser
     jobpilot score       (Fase 2)   run the matching engine
     jobpilot cv          (Fase 3)   tailor + export tailored CVs
-    jobpilot report      (Fase 4)   generate the HTML dashboard
+    jobpilot report      generate the HTML dashboard (output/report.html)
 """
 
 from __future__ import annotations
@@ -65,8 +65,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("queue", help="show the application queue")
     p.add_argument("set", nargs="?", help="offer id to update")
-    p.add_argument("--status", choices=[s.value for s in AppStatus], help="new status (with `set`)")
-    p.add_argument("--notes", default="")
+    p.add_argument("--status", choices=[s.value for s in AppStatus],
+                   help="filter the queue, or the new status with `set`")
+    p.add_argument("--notes", default="", help="notes (with `set`)")
+    p.add_argument("--cv-file", default="", help="attach a generated CV file (with `set`)")
 
     p = sub.add_parser("open", help="open an offer in the browser")
     p.add_argument("id", type=int)
@@ -86,8 +88,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--model", default=None, help="opencode model (provider/model)")
     p.add_argument("--show", action="store_true", help="print the generated markdown")
 
-    p = sub.add_parser("report", help="(report module) ")
-    p.add_argument("--family")
+    p = sub.add_parser("report", help="generate the HTML dashboard")
+    p.add_argument("--family", help="only include offers of this family")
+    p.add_argument("--out", default=None, help="output path (default output/report.html)")
+    p.add_argument("--open", action="store_true", help="open the report in the browser")
 
     return parser
 
@@ -124,8 +128,7 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.command == "cv":
         return _cmd_cv(args)
     if args.command == "report":
-        CONSOLE.print("[yellow]report[/]: dashboard HTML llega en Fase 4.")
-        return 0
+        return _cmd_report(args)
     return 1
 
 
@@ -323,7 +326,7 @@ def _cmd_queue(args: argparse.Namespace) -> int:
         try:
             storage.set_application(
                 conn, offer_id, AppStatus(args.status),
-                notes=args.notes,
+                notes=args.notes, cv_file=args.cv_file,
             )
         except KeyError as exc:
             CONSOLE.print(f"[red]{exc}[/]")
@@ -331,11 +334,12 @@ def _cmd_queue(args: argparse.Namespace) -> int:
         CONSOLE.print(f"[green]oferta {offer_id} -> {args.status}[/]")
         return 0
 
-    rows = storage.list_applications(conn)
+    statuses = [AppStatus(args.status)] if args.status else None
+    rows = storage.list_applications(conn, statuses=statuses)
     if not rows:
         CONSOLE.print("[yellow]Cola vacía. Usa `jobpilot queue set <id> --status apply|review|…`[/]")
         return 0
-    table = Table(title="Cola de aplicaciones")
+    table = Table(title="Cola de aplicaciones" + (f" ({args.status})" if args.status else ""))
     for col in ("id", "estado", "empresa", "título", "cv", "notas"):
         table.add_column(col)
     for row in rows:
@@ -441,7 +445,22 @@ def _cmd_cv(args: argparse.Namespace) -> int:
     if args.show:
         CONSOLE.print("\n" + result["markdown"])
     CONSOLE.print("Para cargarlo en la cola: "
-                  f"[bold]jobpilot queue set {meta['offer_id']} --status apply[/]")
+                  f"[bold]jobpilot queue set {meta['offer_id']} --status apply "
+                  f"--cv-file \"{files.get('md', '')}\"[/]")
+    return 0
+
+
+def _cmd_report(args: argparse.Namespace) -> int:
+    config = load_config()
+    from . import storage
+    from .pipeline.report import build_report
+
+    conn = storage.connect(config.db_path)
+    path = build_report(config, conn, family=args.family,
+                        out=Path(args.out) if args.out else None)
+    CONSOLE.print(f"[green]report generado:[/] {path}")
+    if args.open:
+        webbrowser.open(path.resolve().as_uri())
     return 0
 
 
