@@ -1,9 +1,9 @@
 """Tests for the Fase 4 HTML dashboard report."""
 
 from jobpilot import storage
-from jobpilot.config import load_config
 from jobpilot.models import AppStatus, DimensionScore, Offer, Score, Triage
 from jobpilot.pipeline.report import build_report
+from ._util import sample_config
 
 
 def _seed(conn):
@@ -36,7 +36,7 @@ def _seed(conn):
 
 
 def test_build_report_writes_escaped_html(tmp_path):
-    config = load_config()
+    config = sample_config(tmp_path)
     conn = storage.connect(tmp_path / "db.sqlite")
     run, ids = _seed(conn)
     out = build_report(config, conn, out=tmp_path / "report.html")
@@ -56,7 +56,7 @@ def test_build_report_writes_escaped_html(tmp_path):
 
 
 def test_build_report_family_filter(tmp_path):
-    config = load_config()
+    config = sample_config(tmp_path)
     conn = storage.connect(tmp_path / "db.sqlite")
     _seed(conn)
     out = build_report(config, conn, family="general", out=tmp_path / "report.html")
@@ -67,7 +67,7 @@ def test_build_report_family_filter(tmp_path):
 
 
 def test_build_report_empty(tmp_path):
-    config = load_config()
+    config = sample_config(tmp_path)
     conn = storage.connect(tmp_path / "db.sqlite")
     out = build_report(config, conn, out=tmp_path / "report.html")
     html = out.read_text(encoding="utf-8")

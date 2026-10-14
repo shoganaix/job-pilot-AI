@@ -5,7 +5,6 @@ from pathlib import Path
 import pytest
 
 from jobpilot import storage
-from jobpilot.config import load_config
 from jobpilot.llm import LLMError, _collect_text, extract_json
 from jobpilot.models import Offer
 from jobpilot.pipeline import cv as cvmod
@@ -17,6 +16,8 @@ from jobpilot.pipeline.cv import (
     render_pdf,
     validate_cv,
 )
+
+from ._util import sample_config
 
 
 def _offer(**kw) -> Offer:
@@ -127,7 +128,7 @@ def test_render_markdown_shape():
 
 
 def test_render_pdf_creates_file(tmp_path):
-    cv = heuristic_cv(load_config().master("es"), _offer(), {"skills": {}}, "es")
+    cv = heuristic_cv(sample_config(tmp_path).master("es"), _offer(), {"skills": {}}, "es")
     out = render_pdf(cv, tmp_path / "cv.pdf")
     assert out.exists() and out.stat().st_size > 500
     assert out.read_bytes()[:4] == b"%PDF"
@@ -137,8 +138,8 @@ def test_render_pdf_creates_file(tmp_path):
 # heuristic + e2e
 
 
-def test_heuristic_cv_uses_offer_title_and_sections():
-    config = load_config()
+def test_heuristic_cv_uses_offer_title_and_sections(tmp_path):
+    config = sample_config(tmp_path)
     master = config.master("es")
     cv = heuristic_cv(master, _offer(), {"skills": {"ros2": 9, "python": 8}}, "es")
     assert cv["title"] == "Junior Robotics Engineer"
@@ -153,7 +154,7 @@ def test_heuristic_cv_uses_offer_title_and_sections():
 
 
 def test_generate_cv_heuristic_end_to_end(tmp_path):
-    config = load_config()
+    config = sample_config(tmp_path)
     conn, offer_id, stats = _seeded_conn(tmp_path)
     assert stats["test"][0] == 1
     result = generate_cv(config, conn, offer_id, lang="en", use_llm=False, out_dir=tmp_path)
@@ -168,7 +169,7 @@ def test_generate_cv_heuristic_end_to_end(tmp_path):
 
 
 def test_generate_cv_llm_success(monkeypatch, tmp_path):
-    config = load_config()
+    config = sample_config(tmp_path)
     conn, offer_id, _ = _seeded_conn(tmp_path)
     monkeypatch.setattr(
         cvmod,
@@ -189,7 +190,7 @@ def test_generate_cv_llm_success(monkeypatch, tmp_path):
 
 
 def test_generate_cv_llm_failure_falls_back(monkeypatch, tmp_path):
-    config = load_config()
+    config = sample_config(tmp_path)
     conn, offer_id, _ = _seeded_conn(tmp_path)
 
     def boom(*a, **k):
@@ -203,7 +204,7 @@ def test_generate_cv_llm_failure_falls_back(monkeypatch, tmp_path):
 
 
 def test_generate_cv_unknown_offer(tmp_path):
-    config = load_config()
+    config = sample_config(tmp_path)
     conn = storage.connect(tmp_path / "t.db")
     with pytest.raises(CVError, match="not found"):
         generate_cv(config, conn, 999, use_llm=False, out_dir=tmp_path)

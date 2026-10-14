@@ -4,7 +4,6 @@ from pathlib import Path
 
 from jobpilot import storage
 from jobpilot.config import (
-    REPO_ROOT,
     Config,
     FamilyConfig,
     ProfileConfig,
@@ -16,7 +15,7 @@ from jobpilot.config import (
 from jobpilot.models import Offer
 from jobpilot.pipeline.search import guess_family, plan, run_sync
 
-from ._util import FakeSource
+from ._util import SCAFFOLDS, FakeSource
 
 
 def _offer(sid, title, company="ACME", location="Madrid"):
@@ -25,10 +24,10 @@ def _offer(sid, title, company="ACME", location="Madrid"):
 
 def _config(tmp_path) -> Config:
     return Config(
-        profile_path=REPO_ROOT / "config" / "profile.yaml",
+        profile_path=SCAFFOLDS / "profile.yaml",
         db_path=tmp_path / "db.sqlite",
         snapshot_dir=tmp_path / "snap",
-        master_cv=parse_master_cv(REPO_ROOT / "config" / "master_cv.yaml"),
+        master_cv=parse_master_cv(SCAFFOLDS / "master_cv.yaml"),
         search=SearchConfig(
             target_offers=50,
             max_results_per_query=20,

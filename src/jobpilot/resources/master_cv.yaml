@@ -55,9 +55,9 @@ education:
 # Usa nombres de grupo que reflejen tu perfil real; el scoring los usa
 # tal cual y ordena primero los que coinciden con la oferta.
 skills:
-  Lenguajes: [Python, C++, SQL]
+  Lenguajes: [Python, C++, C, SQL]
   Desarrollo de software: [Git, Docker, Linux]
-  En camino: [ROS2]
+  En camino: [ROS, ROS2]
 
 projects:
   - name: { es: "Nombre del proyecto en español", en: "Project name in English" }

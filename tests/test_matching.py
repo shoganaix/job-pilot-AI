@@ -1,7 +1,6 @@
 """Tests for the matching engine: taxonomy, extract, scoring."""
 
 
-from jobpilot.config import load_config
 from jobpilot.matching.extract import (
     extract_education,
     extract_experience_years,
@@ -20,6 +19,7 @@ from jobpilot.matching.taxonomy import (
     skill_variants,
 )
 from jobpilot.models import Offer, Triage
+from ._util import sample_config
 
 
 def _offer(**kw) -> Offer:
@@ -109,23 +109,23 @@ def test_extract_education():
     assert extract_education(_offer(description="BSc in EE or similar")) == "bachelor"
 
 
-def test_extract_location_port_of_spain_is_not_eu():
+def test_extract_location_port_of_spain_is_not_eu(tmp_path):
     offer = _offer(source="remoteok", remote=True, location="Port of Spain, Trinidad")
-    loc = extract_location(offer, load_config().profile)
+    loc = extract_location(offer, sample_config(tmp_path).profile)
     assert loc["area"] == "Foreign"
     assert loc["weight"] == 20.0
 
 
-def test_extract_location_remote_eu():
-    config = load_config()
+def test_extract_location_remote_eu(tmp_path):
+    config = sample_config(tmp_path)
     offer = _offer(source="himalayas", remote=True, location="Germany remote")
     loc = extract_location(offer, config.profile)
     assert loc["area"] == "Remote EU"
     assert loc["weight"] >= 90.0
 
 
-def test_extract_location_remoteok_remote_flag_ignored():
-    config = load_config()
+def test_extract_location_remoteok_remote_flag_ignored(tmp_path):
+    config = sample_config(tmp_path)
     offer = _offer(source="remoteok", remote=True, location="Cincinnati, OH")
     loc = extract_location(offer, config.profile)
     assert loc["kind"] == "onsite"
@@ -167,8 +167,8 @@ def test_relocation_drops_port_of_spain():
     assert foreign_relocation_reason(offer) is not None
 
 
-def test_score_offer_discards_foreign_onsite():
-    config = load_config()
+def test_score_offer_discards_foreign_onsite(tmp_path):
+    config = sample_config(tmp_path)
     family = config.family("robotics")
     offer = _offer(source="adzuna", location="UK, London",
                    description="Junior Robotics Engineer using ROS2, C++ and Python. On-site.")
@@ -181,8 +181,8 @@ def test_score_offer_discards_foreign_onsite():
 # scoring
 
 
-def test_score_offer_shape():
-    config = load_config()
+def test_score_offer_shape(tmp_path):
+    config = sample_config(tmp_path)
     family = config.family("robotics")
     offer = _offer(
         description=(
@@ -197,24 +197,24 @@ def test_score_offer_shape():
     assert res["total"] > 0
 
 
-def test_score_offer_hard_filter_discards():
-    config = load_config()
+def test_score_offer_hard_filter_discards(tmp_path):
+    config = sample_config(tmp_path)
     family = config.family("robotics")
     offer = _offer(description="Must be a US citizen, active security clearance required.")
     res = score_offer(offer, family, config)
     assert res["triage"] is Triage.DISCARD
 
 
-def test_score_offer_low_skills_cannot_apply():
-    config = load_config()
+def test_score_offer_low_skills_cannot_apply(tmp_path):
+    config = sample_config(tmp_path)
     family = config.family("electronics")
     offer = _offer(description="Junior quality assistant in Port of Spain, TT.")
     res = score_offer(offer, family, config)
     assert res["triage"] is not Triage.APPLY
 
 
-def test_skills_dimension_no_longer_crushes_short_postings():
-    config = load_config()
+def test_skills_dimension_no_longer_crushes_short_postings(tmp_path):
+    config = sample_config(tmp_path)
     family = config.family("robotics")
     offer = _offer(description="Junior Robotics Engineer using ROS2, C++ and Python.")
     res = score_offer(offer, family, config)
@@ -224,8 +224,8 @@ def test_skills_dimension_no_longer_crushes_short_postings():
     assert "demand=100%" in skills["evidence"]
 
 
-def test_skills_dimension_single_weak_hit_stays_low():
-    config = load_config()
+def test_skills_dimension_single_weak_hit_stays_low(tmp_path):
+    config = sample_config(tmp_path)
     family = config.family("test_validation")
     offer = _offer(title="Administrative Assistant",
                    description="Office assistant. MS Office and Excel, no engineering.")
@@ -233,8 +233,8 @@ def test_skills_dimension_single_weak_hit_stays_low():
     assert res["breakdown"]["skills"]["value"] < 15
 
 
-def test_extract_offer_signals_complete():
-    config = load_config()
+def test_extract_offer_signals_complete(tmp_path):
+    config = sample_config(tmp_path)
     offer = _offer(description="Junior role, 2+ years, C++.", location="Madrid, Spain")
     sig = extract_offer_signals(offer, config.family("embedded"), config)
     assert sig["seniority"] == "junior"
