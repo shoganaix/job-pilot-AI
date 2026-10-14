@@ -267,6 +267,21 @@ def parse_master_cv(path: Path) -> MasterCV:
     )
 
 
+def _resolve_path(value: str | Path | None, default: Path) -> Path:
+    """Anchor a configured path to the repo root.
+
+    Relative values under ``project:`` (``db_path``, ``snapshot_dir``,
+    ``master_cv``, ``output_dir``) must not depend on the shell's current
+    working directory, otherwise the CLI breaks -- and scatters data across
+    directories -- as soon as it is launched from anywhere but the repo root.
+    Absolute values are kept as-is so users can still point at their own storage.
+    """
+    if value is None:
+        return default
+    path = Path(str(value))
+    return path if path.is_absolute() else (REPO_ROOT / path)
+
+
 def load_config(profile_path: Path = DEFAULT_PROFILE) -> Config:
     load_dotenv()
     if not profile_path.exists():
@@ -278,9 +293,13 @@ def load_config(profile_path: Path = DEFAULT_PROFILE) -> Config:
     search = raw.get("search", {}) or {}
     return Config(
         profile_path=profile_path,
-        db_path=Path(top.get("db_path", str(DEFAULT_DB_PATH))),
-        snapshot_dir=Path(top.get("snapshot_dir", str(REPO_ROOT / "data" / "snapshots"))),
-        master_cv=parse_master_cv(Path(top.get("master_cv", "config/master_cv.yaml"))),
+        db_path=_resolve_path(top.get("db_path"), DEFAULT_DB_PATH),
+        snapshot_dir=_resolve_path(
+            top.get("snapshot_dir"), REPO_ROOT / "data" / "snapshots"
+        ),
+        master_cv=parse_master_cv(
+            _resolve_path(top.get("master_cv"), REPO_ROOT / "config" / "master_cv.yaml")
+        ),
         search=parse_search(search),
         families=parse_families(raw.get("families", []) or []),
         scoring=ScoringConfig(
@@ -290,7 +309,7 @@ def load_config(profile_path: Path = DEFAULT_PROFILE) -> Config:
             min_skills_for_apply=float(raw.get("scoring", {}).get("min_skills_for_apply", 20.0)),
         ),
         profile=parse_profile(raw.get("profile", {}) or {}),
-        output_dir=Path(top.get("output_dir", "output")),
+        output_dir=_resolve_path(top.get("output_dir"), REPO_ROOT / "output"),
         ats_companies={
             key: [str(c) for c in (raw.get("ats_companies", {}).get(key) or [])]
             for key in ("greenhouse", "lever")

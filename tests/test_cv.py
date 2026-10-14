@@ -147,7 +147,7 @@ def test_heuristic_cv_uses_offer_title_and_sections():
     assert "Experiencia profesional" in headings
     assert "Educación" in headings
     # groups with matched skills float to the top
-    assert cv["sections"][0]["items"][0]["title"] in {"En camino (robótica/embedded)", "Lenguajes"}
+    assert cv["sections"][0]["items"][0]["title"] in {"En camino", "Lenguajes"}
     en = heuristic_cv(config.master("en"), _offer(), {"skills": {}}, "en")
     assert en["sections"][0]["heading"] == "Technical Skills"
 

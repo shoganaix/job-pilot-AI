@@ -202,9 +202,9 @@ def run_sync(
                         scroll_pools[pool_key] = fetch_scroll_pages(src, location)
                     slot = PlannedQuery(family=family, source=src_name, location=location, query="")
                     for query in slot.queries:
-                        for page in scroll_pools[pool_key]:
+                        for spage in scroll_pools[pool_key]:
                             matched = [
-                                offer for offer in page.offers
+                                offer for offer in spage.offers
                                 if matches_query(offer_haystack(offer), query)
                             ]
                             if matched:
@@ -268,9 +268,9 @@ def run_sync(
         if snap is not None:
             run_folder = snap / f"run-{run_id}"
             run_folder.mkdir(parents=True, exist_ok=True)
-            for source, payloads in snapshots.items():
+            for snap_source, payloads in snapshots.items():
                 lines = [json.dumps(p, ensure_ascii=False) for p in payloads]
-                (run_folder / f"{source}.jsonl").write_text("\n".join(lines), encoding="utf-8")
+                (run_folder / f"{snap_source}.jsonl").write_text("\n".join(lines), encoding="utf-8")
             (run_folder / "manifest.json").write_text(
                 json.dumps(stats.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8"
             )

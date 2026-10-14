@@ -206,6 +206,7 @@ def validate_cv(data: Any) -> dict:
     """Coerce model output into the canonical CV dict or raise CVError."""
     if not isinstance(data, dict):
         raise CVError(f"expected a JSON object, got {type(data).__name__}")
+    sections: list[dict[str, Any]] = []
     cv = {
         "name": str(data.get("name") or "").strip(),
         "title": str(data.get("title") or "").strip(),
@@ -215,7 +216,7 @@ def validate_cv(data: Any) -> dict:
             for k, v in (data.get("contact") or {}).items()
             if v not in (None, "")
         },
-        "sections": [],
+        "sections": sections,
     }
     for sec in data.get("sections") or []:
         if not isinstance(sec, dict):
@@ -234,7 +235,7 @@ def validate_cv(data: Any) -> dict:
             if any(coerced.values()):
                 items.append(coerced)
         if items:
-            cv["sections"].append(
+            sections.append(
                 {"heading": str(sec.get("heading") or "").strip(), "items": items}
             )
     if not cv["name"] or not cv["summary"] or not cv["sections"]:

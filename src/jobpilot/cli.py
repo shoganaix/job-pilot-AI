@@ -446,6 +446,7 @@ def _cmd_score(args: argparse.Namespace) -> int:
     summary.add_row("[dim]hard filters[/]", str(stats.discarded_by_hard_filters), "")
     CONSOLE.print(summary)
 
+    assert run_fin.id is not None  # run_start always assigns a rowid
     rows = storage.scores_for_run(conn, run_fin.id)
     per_triage: dict[str, list] = {t.value: [] for t in Triage}
     for row in rows:

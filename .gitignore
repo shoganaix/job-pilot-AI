@@ -11,7 +11,11 @@ dist/
 # Environment / secrets
 .env
 
-# Local data (never commit personal job data)
+# Personal data — never commit.
+# config/ holds the real master CV and profile; cv/ holds generated CVs.
+# `jobpilot init` scaffolds them from src/jobpilot/resources/* on first run.
+config/
+cv/
 data/
 output/
 

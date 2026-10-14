@@ -278,7 +278,7 @@ def search_offers(conn: sqlite3.Connection, text: str, limit: int = 40) -> list[
     if not terms:
         return []
     clauses: list[str] = []
-    params: list[str] = []
+    params: list[str | int] = []
     for term in terms:
         like = f"%{term}%"
         clauses.append(
@@ -419,6 +419,7 @@ def save_cv_variant(
         (family, job_title, content, _now()),
     )
     conn.commit()
+    assert cur.lastrowid is not None  # INSERT always assigns a rowid
     return int(cur.lastrowid)
 
 

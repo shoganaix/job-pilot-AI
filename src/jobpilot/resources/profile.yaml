@@ -1,79 +1,474 @@
-# Scaffold copy used by `jobpilot init` when config files are missing.
-# Edit the real ones in config/ — this is only a regeneration template.
+# =============================================================
+# Scaffold de profile.yaml — copia de regeneracion para `jobpilot init`.
+#
+# `jobpilot init` copia este fichero a config/profile.yaml SOLO si no
+# existe. Edite el real en config/; este es un espejo, no su configuracion.
+# Mantenerlo sincronizado para que init regenere el perfil vigente.
+# =============================================================
 project:
   db_path: data/jobpilot.db
   snapshot_dir: data/snapshots
   master_cv: config/master_cv.yaml
   output_dir: output
 
+# ------------------------------------------------------------------------- #
+# Búsqueda
+# ------------------------------------------------------------------------- #
 search:
-  target_offers: 300
-  max_results_per_query: 50
-  max_pages_per_query: 2
-  exclude_foreign_onsite: true  # keep only 100% remote (anywhere) or Spain
+  target_offers: 300        # objetivo orientativo del sync
+  max_results_per_query: 50 # max ofertas a guardar por (query, fuente)
+  max_pages_per_query: 2    # páginas máximo por (query, fuente)
+  # Excluye ofertas híbridas/presenciales fuera de España (no puedes trasladarte);
+  # se mantienen: 100% remoto en cualquier país y todo lo que esté en España.
+  exclude_foreign_onsite: true
   locations:
     - { name: "Spain",   adzuna_country: "es" }
     - { name: "Germany", adzuna_country: "de" }
     - { name: "UK",      adzuna_country: "gb" }
 
+# ------------------------------------------------------------------------- #
+# Familias de búsqueda (agrupa tus ~20 roles). Ajusta queries/skills.
+# sources disponibles: adzuna, arbeitnow, remoteok, himalayas
+# (greenhouse/lever se usan aparte vía ats_companies)
+# ------------------------------------------------------------------------- #
 families:
   - id: robotics
     label: "Robotics & Autonomous"
-    queries: [ "Robotics Engineer", "Robotics Software Engineer", "Junior Robotics Engineer", "Autonomous Systems", "Rover" ]
+    weight: 1.0
+    interest: 10
+    queries:
+      - "Robotics Engineer"
+      - "Junior Robotics Engineer"
+      - "Robotics Software Engineer"
+      - "Junior Robotics Software Engineer"
+      - "Robot Software Developer"
+      - "Robotics Developer"
+      - "Robotics Programmer"
+      - "Autonomous Systems Engineer"
+      - "Autonomous Mobile Robots"
+      - "Mobile Robotics"
+      - "Robot Control Engineer"
+      - "Robotics Simulation Engineer"
+      - "ROS Developer"
+      - "ROS2 Developer"
+      - "Robotics Graduate"
+      - "Robotics Internship"
+      - "Robotics Trainee"
+    adzuna_queries:
+      es:
+        - "robótica"
+        - "vehículos autónomos"
+        - "ingeniero robótica"
+        - "desarrollador robótica"
+        - "programador robótica"
+        - "software robótica"
+        - "robótica móvil"
+        - "sistemas autónomos"
+        - "ingeniero control robótico"
+        - "robótica junior"
+        - "prácticas robótica"
+      de:
+        - "Robotik Ingenieur"
+        - "Robotik"
+        - "Autonome Systeme"
+        - "Autonome Fahrzeuge"
     sources: [adzuna, arbeitnow, remoteok, himalayas]
-    skills: { ros: 9, ros2: 9, python: 8, c++: 7, kinematics: 7, "motion planning": 7, slam: 7, perception: 7, gazebo: 6, simulation: 5, "control systems": 6, "real time": 5 }
+    skills:
+      ros: 9
+      ros2: 9
+      python: 8
+      c++: 7
+      kinematics: 7
+      "motion planning": 7
+      slam: 7
+      perception: 7
+      gazebo: 6
+      simulation: 5
+      "control systems": 6
+      "real time": 5
+      "model predictive control": 5
 
   - id: embedded
     label: "Embedded & Firmware"
-    queries: [ "Embedded Software Engineer", "Embedded Systems Engineer", "Firmware Engineer" ]
+    weight: 1.0
+    interest: 9
+    queries:
+      - "Embedded Software Engineer"
+      - "Junior Embedded Software Engineer"
+      - "Embedded Software Developer"
+      - "Embedded C Developer"
+      - "Embedded C++ Developer"
+      - "Firmware Engineer"
+      - "Junior Firmware Engineer"
+      - "Firmware Developer"
+      - "Embedded Systems Developer"
+      - "Microcontroller Programmer"
+      - "Embedded Linux Developer"
+      - "Embedded Software Graduate"
+      - "Embedded Software Internship"
+    adzuna_queries:
+      es:
+        - "software embebido"
+        - "sistemas embebidos"
+        - "sistemas empotrados"
+        - "programador firmware"
+        - "desarrollador firmware"
+        - "programador C embebido"
+        - "microcontroladores"
+        - "electrónica embebida"
+      de:
+        - "Embedded Software Engineer"
+        - "Embedded Systems"
+        - "Firmwareentwickler"
+        - "Eingebettete Systeme"
     sources: [adzuna, arbeitnow, remoteok, himalayas]
-    skills: { c: 9, c++: 8, embedded: 9, microcontroller: 8, mcu: 7, arm: 7, stm32: 7, rtos: 7, "bare metal": 7, firmware: 8, i2c: 6, spi: 6, uart: 6, "can bus": 5, "linux kernel": 5 }
+    skills:
+      c: 9
+      c++: 8
+      embedded: 9
+      microcontroller: 8
+      mcu: 7
+      arm: 7
+      stm32: 7
+      rtos: 7
+      "bare metal": 7
+      firmware: 8
+      i2c: 6
+      spi: 6
+      uart: 6
+      "can bus": 5
+      "linux kernel": 5
 
   - id: electronics
     label: "Electronics & Hardware"
-    queries: [ "Electronics Engineer", "Electronics Test Engineer", "PCB Design Engineer", "Hardware Engineer" ]
+    weight: 1.0
+    interest: 8
+    queries:
+      - "Electronics Engineer"
+      - "Electronics Test Engineer"
+      - "PCB Design Engineer"
+      - "Hardware Engineer"
+    adzuna_queries:
+      es:
+        - "electrónica"
+        - "electrónico"
+      de:
+        - "Elektronikingenieur"
+        - "Elektronik"
+        - "PCB Design"
+        - "Hardwareentwickler"
     sources: [adzuna, arbeitnow, remoteok, himalayas]
-    skills: { electronics: 8, pcb: 7, "altium designer": 6, kicad: 6, schematic: 6, hardware: 6, oscilloscope: 6, soldering: 5, labview: 5, "signal integrity": 5, "power electronics": 5 }
+    skills:
+      electronics: 8
+      pcb: 7
+      "altium designer": 6
+      kicad: 6
+      schematic: 6
+      hardware: 6
+      oscilloscope: 6
+      soldering: 5
+      labview: 5
+      "signal integrity": 5
+      "power electronics": 5
 
   - id: test_validation
     label: "Test, Validation & AIT/AIV"
-    queries: [ "Test and Validation Engineer", "Test Engineer", "AIT Engineer", "AIV Engineer" ]
+    weight: 1.0
+    interest: 8
+    queries:
+      - "Test and Validation Engineer"
+      - "Test Engineer"
+      - "AIT Engineer"
+      - "AIV Engineer"
+    adzuna_queries:
+      es:
+        - "pruebas"
+        - "testing"
+      de:
+        - "Testingenieur"
+        - "Test und Validierung"
+        - "Validierungsingenieur"
     sources: [adzuna, arbeitnow, remoteok, himalayas]
-    skills: { testing: 8, validation: 7, "test automation": 7, pytest: 6, "ci/cd": 6, integration: 6, verification: 6, "requirement traceability": 5, "test plan": 5, jira: 4 }
+    skills:
+      testing: 8
+      validation: 7
+      "test automation": 7
+      pytest: 6
+      "ci/cd": 6
+      integration: 6
+      verification: 6
+      "requirement traceability": 5
+      "test plan": 5
+      jira: 4
 
   - id: systems_gnc
     label: "Systems, GNC, Avionics & Space"
-    queries: [ "Systems Engineer", "GNC Engineer", "Guidance Navigation Control", "Avionics Engineer", "Space Systems Engineer", "Satellite Engineer" ]
+    weight: 1.0
+    interest: 9
+    queries:
+      - "Systems Engineer"
+      - "GNC Engineer"
+      - "Guidance Navigation Control"
+      - "Avionics Engineer"
+      - "Space Systems Engineer"
+      - "Satellite Engineer"
+    adzuna_queries:
+      es:
+        - "aviónica"
+        - "aeroespacial"
+      de:
+        - "Systemingenieur"
+        - "Avionik"
+        - "Raumfahrt"
+        - "Satellit"
+        - "GNC"
     sources: [adzuna, arbeitnow, remoteok, himalayas]
-    skills: { "systems engineering": 8, requirements: 7, mbse: 6, "do-178": 5, ecss: 5, avionics: 6, "attitude control": 6, orbit: 5, guidance: 6, navigation: 6, spacecraft: 6, "ground segment": 4 }
+    skills:
+      "systems engineering": 8
+      requirements: 7
+      mbse: 6
+      "do-178": 5
+      ecss: 5
+      avionics: 6
+      "attitude control": 6
+      orbit: 5
+      guidance: 6
+      navigation: 6
+      "spacecraft": 6
+      "ground segment": 4
 
   - id: automation_controls
     label: "Automation & Controls"
-    queries: [ "Automation Engineer", "Controls Engineer", "Robotics Automation" ]
+    weight: 1.0
+    interest: 7
+    queries:
+      - "Automation Engineer"
+      - "Controls Engineer"
+      - "Robotics Automation"
+    adzuna_queries:
+      es:
+        - "control de procesos"
+        - "automática"
+        - "automatización"
+      de:
+        - "Automatisierungsingenieur"
+        - "Automatisierung"
+        - "Regelungstechnik"
+        - "Steuerungstechnik"
     sources: [adzuna, arbeitnow, remoteok, himalayas]
-    skills: { plc: 6, scada: 5, python: 7, controls: 6, pid: 5, "industrial automation": 6, fieldbus: 4, "isa-95": 4, instrumentation: 5 }
+    skills:
+      plc: 6
+      scada: 5
+      python: 7
+      controls: 6
+      pid: 5
+      "industrial automation": 6
+      fieldbus: 4
+      "isa-95": 4
+      instrumentation: 5
 
   - id: software_perception
     label: "Software, Python & Computer Vision"
-    queries: [ "Python Developer", "Computer Vision Engineer", "Software Engineer" ]
+    weight: 1.0
+    interest: 8
+    queries:
+      - "Python Developer"
+      - "Computer Vision Engineer"
+      - "Software Engineer"
+    adzuna_queries:
+      es:
+        - "desarrollador de software"
+        - "software"
+        - "python"
+        - "visión artificial"
+      de:
+        - "Python Entwickler"
+        - "Softwareentwickler"
+        - "Computer Vision"
+        - "Deep Learning"
     sources: [adzuna, arbeitnow, remoteok, himalayas]
-    skills: { python: 9, "computer vision": 8, "deep learning": 7, opencv: 7, pytorch: 6, numpy: 6, "clean code": 5, "ci/cd": 5, git: 5 }
+    skills:
+      python: 9
+      "computer vision": 8
+      "deep learning": 7
+      opencv: 7
+      pytorch: 6
+      numpy: 6
+      "clean code": 5
+      "ci/cd": 5
+      git: 5
 
+  - id: space_software
+    label: "Space Software & Satellite Systems"
+    weight: 1.0
+    interest: 10
+
+    queries:
+      - "Space Software Engineer"
+      - "Junior Space Software Engineer"
+      - "Satellite Software Engineer"
+      - "Flight Software Engineer"
+      - "Onboard Software Engineer"
+      - "Spacecraft Software Developer"
+      - "Ground Segment Software Engineer"
+      - "Mission Control Software Engineer"
+      - "Space Simulation Engineer"
+      - "Satellite Simulation Engineer"
+      - "Space Robotics Engineer"
+      - "Space Software Graduate"
+      - "Space Engineering Internship"
+
+    adzuna_queries:
+      es:
+        - "software espacial"
+        - "software satélites"
+        - "software aeroespacial"
+        - "simulación espacial"
+        - "software de vuelo"
+        - "ingeniería satélites"
+        - "software segmento terreno"
+
+      de:
+        - "Raumfahrt Software"
+        - "Satellitensoftware"
+        - "Flugsoftware"
+        - "Raumfahrt Softwareentwickler"
+
+    sources: [adzuna, arbeitnow, remoteok, himalayas]
+
+    skills:
+      python: 9
+      c++: 9
+      c: 8
+      simulation: 8
+      matlab: 7
+      simulink: 7
+      linux: 7
+      "flight software": 7
+      "attitude control": 7
+      "spacecraft": 6
+      "embedded software": 7
+
+  - id: simulation
+    label: "Simulation & Digital Twins"
+    weight: 1.0
+    interest: 9
+
+    queries:
+      - "Simulation Software Engineer"
+      - "Simulation Developer"
+      - "Junior Simulation Engineer"
+      - "Digital Twin Developer"
+      - "Digital Twin Engineer"
+      - "Robotics Simulation Developer"
+      - "Industrial Simulation Engineer"
+      - "Unity Simulation Developer"
+      - "Virtual Commissioning Engineer"
+      - "Modelling and Simulation Engineer"
+      - "Simulation Software Graduate"
+
+    adzuna_queries:
+      es:
+        - "desarrollador simulación"
+        - "ingeniero simulación"
+        - "gemelo digital"
+        - "simulación industrial"
+        - "simulación robótica"
+        - "modelado y simulación"
+
+      de:
+        - "Simulationsingenieur"
+        - "Simulationsentwickler"
+        - "Digitaler Zwilling"
+        - "Robotersimulation"
+
+    sources: [adzuna, arbeitnow, remoteok, himalayas]
+
+    skills:
+      simulation: 9
+      python: 8
+      c++: 8
+      c#: 7
+      unity: 8
+      matlab: 7
+      simulink: 7
+      cad: 6
+      robotics: 6
+
+  - id: mechatronics
+    label: "Mechatronics & Robotics Integration"
+    weight: 1.0
+    interest: 9
+
+    queries:
+      - "Mechatronics Engineer"
+      - "Junior Mechatronics Engineer"
+      - "Robotics Integration Engineer"
+      - "Hardware Software Integration Engineer"
+      - "Systems Integration Engineer"
+      - "Electromechanical Engineer"
+      - "Robot Integration Technician"
+      - "Mechatronics Graduate"
+
+    adzuna_queries:
+      es:
+        - "mecatrónica"
+        - "ingeniería mecatrónica"
+        - "integración robótica"
+        - "integración hardware software"
+        - "sistemas electromecánicos"
+
+      de:
+        - "Mechatronik"
+        - "Mechatronik Ingenieur"
+        - "Systemintegration"
+        - "Robotik Integration"
+
+    sources: [adzuna, arbeitnow, remoteok, himalayas]
+
+    skills:
+      robotics: 9
+      electronics: 8
+      python: 7
+      c++: 7
+      microcontroller: 7
+      hardware: 7
+      integration: 7
+      cad: 6
+      testing: 6
+
+# ------------------------------------------------------------------------- #
+# Scoring
+# ------------------------------------------------------------------------- #
 scoring:
   threshold: 65
   review_threshold: 45
-  weights: { skills: 30, experience: 20, education: 10, location: 15, seniority: 15, interest: 10 }
+  weights:
+    skills: 30
+    experience: 20
+    education: 10
+    location: 15
+    seniority: 15
+    interest: 10
 
+# ------------------------------------------------------------------------- #
+# Tu perfil (el matching lo usa para puntuar)
+# ------------------------------------------------------------------------- #
 profile:
   seniority_target: junior
   languages: [es, en]
   locations:
-    - { area: "Madrid (Spain)", kind: onsite, weight: 100 }
-    - { area: "Spain", kind: onsite, weight: 85 }
-    - { area: "Remote EU", kind: remote, weight: 90 }
-    - { area: "Remote global", kind: remote, weight: 60 }
+    - { area: "Madrid (Spain)", kind: onsite,  weight: 100 }
+    - { area: "Spain",          kind: onsite,  weight: 85 }
+    - { area: "Remote EU",      kind: remote,  weight: 90 }
+    - { area: "Remote global",  kind: remote,  weight: 60 }
   exclude_companies: []
 
+# ------------------------------------------------------------------------- #
+# Empresas objetivo por ATS (boards keyless). Formato: slug de la empresa.
+#   greenhouse: usa boards-api.greenhouse.io/v1/boards/{slug}
+#   lever:      usa api.lever.co/v0/postings/{slug}
+# ------------------------------------------------------------------------- #
 ats_companies:
   greenhouse: []
   lever: []

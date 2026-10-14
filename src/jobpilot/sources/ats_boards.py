@@ -91,8 +91,9 @@ class LeverSource(JobSource):
         salary = item.get("salaryRange") or {}
         if salary:
             try:
-                salary_min = float(salary.get("min")) if salary.get("min") is not None else None
-                salary_max = float(salary.get("max")) if salary.get("max") is not None else None
+                raw_min, raw_max = salary.get("min"), salary.get("max")
+                salary_min = float(raw_min) if raw_min is not None else None
+                salary_max = float(raw_max) if raw_max is not None else None
             except (TypeError, ValueError):
                 salary_min = salary_max = None
         return Offer(

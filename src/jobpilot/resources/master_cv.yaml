@@ -1,0 +1,75 @@
+# =============================================================
+# Scaffold de master_cv.yaml — copia deEJEMPLO para `jobpilot init`.
+#
+# `jobpilot init` copia este fichero a config/master_cv.yaml SOLO si
+# no existe. Edite el real en config/; este es únicamente la plantilla
+# de regeneración, no su CV.
+#
+# Estructura requerida por `jobpilot.config.parse_master_cv`:
+#   obligatorias -> contact, summary, experience, education, skills
+#   opcionales   -> projects, certifications
+#
+# Los campos narrativos (summary, roles, títulos, descripciones) se
+# escriben como {es, en} y `config.master(lang)` los resuelve de forma
+# determinista. contact y skills son neutro-idiomáticos: NO se traducen.
+#
+# Cualquier grupo de skills cuyo título contenga "camino" puntúa a
+# factor 0.5 en el scoring (aprendizaje en curso, no producción).
+# =============================================================
+contact:
+  name: "Tu Nombre"
+  email: "tu@email.com"
+  phone: "+34 600 000 000"
+  city: "Madrid, España"
+  linkedin: "linkedin.com/in/tu-usuario"
+  github: "github.com/tu-usuario"
+
+summary:
+  es: |
+    Resumen profesional en español: tu perfil técnico, tu experiencia
+    más relevante y qué tipo de puesto buscas.
+  en: |
+    Professional summary in English: your technical background, your most
+    relevant experience and the kind of role you are targeting.
+
+experience:
+  - company: "Nombre de la Empresa"
+    role: { es: "Puesto en español", en: "Job Title in English" }
+    start: "2023"
+    end: "2025"
+    bullets:
+      - { es: "Logro o responsabilidad en español.",
+          en: "Achievement or responsibility in English." }
+      - { es: "Segundo punto en español.",
+          en: "Second bullet in English." }
+
+education:
+  - degree:
+      es: "Nombre de la titulación en español"
+      en: "Degree name in English"
+    school: "Centro educativo"
+    start: "2018"
+    end: "2022"
+
+# Grupos de skills: { nombre_del_grupo: [skills] }.
+# Usa nombres de grupo que reflejen tu perfil real; el scoring los usa
+# tal cual y ordena primero los que coinciden con la oferta.
+skills:
+  Lenguajes: [Python, C++, SQL]
+  Desarrollo de software: [Git, Docker, Linux]
+  En camino: [ROS2]
+
+projects:
+  - name: { es: "Nombre del proyecto en español", en: "Project name in English" }
+    url: "https://github.com/tu-usuario/proyecto"
+    description:
+      es: "Descripción del proyecto en español."
+      en: "Project description in English."
+
+certifications:
+  - name:
+      es: "Nombre de la certificación en español"
+      en: "Certification name in English"
+    issuer: "Entidad emisora"
+    year: "2026"
+    note: { es: "Nota opcional en español", en: "Optional note in English" }
