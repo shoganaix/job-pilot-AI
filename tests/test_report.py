@@ -3,6 +3,7 @@
 from jobpilot import storage
 from jobpilot.models import AppStatus, DimensionScore, Offer, Score, Triage
 from jobpilot.pipeline.report import build_report
+
 from ._util import sample_config
 
 

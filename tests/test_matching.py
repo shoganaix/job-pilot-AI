@@ -20,6 +20,7 @@ from jobpilot.matching.taxonomy import (
     skill_variants,
 )
 from jobpilot.models import Offer, Triage
+
 from ._util import sample_config
 
 
