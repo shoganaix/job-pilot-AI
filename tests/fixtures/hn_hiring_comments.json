@@ -1,0 +1,45 @@
+{
+  "hits": [
+    {
+      "author": "astrabio",
+      "comment_text": "Varda Space | Software Engineer, Flight Software (C++, Linux) | REMOTE (EU) | Full-time<p>We build reentry vehicles and fly them for our customers. The flight software team owns the GNC loop and the telemetry pipeline.<p>Stack: C++17, Linux, CMake, Python for tooling. You will work with our systems engineers on the flight and integration tests.<p>Apply: <a href=\"https://boards.greenhouse.io/varda/jobs/910001\" rel=\"nofollow\">https://boards.greenhouse.io/varda/jobs/910001</a>.",
+      "created_at": "2026-10-14T21:53:28Z",
+      "objectID": "50095921",
+      "parent_id": "49922569",
+      "story_id": "49922569",
+      "story_title": "Ask HN: Who is hiring? (October 2026)"
+    },
+    {
+      "author": "kscan1992",
+      "comment_text": "NeuralFrame | Senior Backend Engineer, Medical Data Pipeline (Python + Rust) | REMOTE (US only, US time zones; no visa sponsorship) | Full-time | $170k\u2013$210k<p>We build software that hospitals use. Rust in the data acquisition layer, async Python for the rest.<p>Stack: Rust, Python, PostgreSQL, AWS.<p>Apply: <a href=\"https://wellfound.com/jobs/4829721\" rel=\"nofollow\">https://wellfound.com/jobs/4829721</a>.",
+      "created_at": "2026-10-14T21:52:00Z",
+      "objectID": "50095900",
+      "parent_id": "49922569",
+      "story_id": "49922569",
+      "story_title": "Ask HN: Who is hiring? (October 2026)"
+    },
+    {
+      "author": "curiousdev",
+      "comment_text": "Interesting, how do you handle OTA updates?",
+      "created_at": "2026-10-14T21:54:10Z",
+      "objectID": "50095930",
+      "parent_id": "50095921",
+      "story_id": "49922569",
+      "story_title": "Ask HN: Who is hiring? (October 2026)"
+    },
+    {
+      "author": "nostalgia42",
+      "comment_text": "Does the flight software team use any formal methods? Sounds like a safety-critical codebase.",
+      "created_at": "2026-10-14T21:55:00Z",
+      "objectID": "50095931",
+      "parent_id": "49922569",
+      "story_id": "49922569",
+      "story_title": "Ask HN: Who is hiring? (October 2026)"
+    }
+  ],
+  "nbHits": 4,
+  "nbPages": 1,
+  "page": 0,
+  "hitsPerPage": 100,
+  "story_id": "49922569"
+}

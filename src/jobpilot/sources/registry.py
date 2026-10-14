@@ -7,7 +7,9 @@ from .adzuna import AdzunaSource
 from .arbeitnow import ArbeitnowSource
 from .ats_boards import GreenhouseSource, LeverSource
 from .base import JobSource, SourceUnavailable
+from .devglobaljobs import DevGlobalJobsSource
 from .himalayas import HimalayasSource
+from .hn_hiring import HNWhoIsHiringSource
 from .remoteok import RemoteOKSource
 
 # Human-friendly descriptions of each source, used by the CLI explainer.
@@ -16,6 +18,8 @@ SOURCE_META: dict[str, str] = {
     "arbeitnow": "Keyless European remote-first feed, full descriptions.",
     "remoteok": "Keyless global remote tech board.",
     "himalayas": "Keyless remote jobs, structured salary/seniority.",
+    "hn_hiring": "Keyless HN 'Who is hiring?' monthly thread (startups).",
+    "devglobaljobs": "Keyless Dev Global Jobs feed (30 newest ATS postings).",
     "greenhouse": "Target-company ATS boards (keyless).",
     "lever": "Target-company ATS postings (keyless).",
 }
@@ -30,6 +34,10 @@ def build_source(name: str, config: Config) -> JobSource:
         return RemoteOKSource()
     if name == "himalayas":
         return HimalayasSource()
+    if name == "hn_hiring":
+        return HNWhoIsHiringSource()
+    if name == "devglobaljobs":
+        return DevGlobalJobsSource()
     if name == "greenhouse":
         return GreenhouseSource(companies=config.ats_companies.get("greenhouse", []))
     if name == "lever":

@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.1",
+  "name": "Dev Global Jobs Latest Public Jobs",
+  "canonical_site": "https://devglobaljobs.com/",
+  "updated_at": "2026-10-14T22:15:01.998891Z",
+  "count": 3,
+  "job_url_template": "https://devglobaljobs.com/jobs/detail/{job-id}",
+  "items": [
+    {
+      "id": "163319006",
+      "canonical_url": "https://devglobaljobs.com/jobs/detail/163319006",
+      "title": "Senior Account Executive, SLED (PacNW)",
+      "organization": "Cloudflare",
+      "location": "Distributed",
+      "country": null,
+      "category": "technology",
+      "skill_category": "sales",
+      "employment_type": "Full-time",
+      "salary": null,
+      "date_posted": "2026-10-14T22:03:44.184Z",
+      "source": "Greenhouse",
+      "source_url": "https://boards.greenhouse.io/cloudflare/jobs/8279967?gh_jid=8279967",
+      "description": "<div class=\"content-intro\"><h3>About Us</h3><p>We help build a better Internet.</p></div><h2>About the Role</h2><p>You will be responsible for developing and executing against a comprehensive territory plan.</p>"
+    },
+    {
+      "id": "163320102",
+      "canonical_url": "https://devglobaljobs.com/jobs/detail/163320102",
+      "title": "Director, People Business Partner, AMER Field Sales",
+      "organization": "Okta",
+      "location": "San Francisco, California",
+      "country": null,
+      "category": "technology",
+      "skill_category": "business",
+      "employment_type": "Full-time",
+      "salary": null,
+      "date_posted": "2026-10-14T22:03:44.420Z",
+      "source": "Greenhouse",
+      "source_url": "https://www.okta.com/company/careers/opportunity/8282692",
+      "description": "<div class=\"content-intro\"><p>Identity is the key to unlocking the potential of AI.</p></div><p>The annual base salary range for this position located in the San Francisco Bay area is between $219,000 and $301,000 USD.</p>"
+    },
+    {
+      "id": "163310777",
+      "canonical_url": "https://devglobaljobs.com/jobs/detail/163310777",
+      "title": "Junior Robotics Software Engineer",
+      "organization": "Ionic Robotics",
+      "location": "Munich, Germany",
+      "country": "Germany",
+      "category": "technology",
+      "skill_category": "technology",
+      "employment_type": "Full-time",
+      "salary": null,
+      "date_posted": "2026-10-14T21:12:00.000Z",
+      "source": "Ashby",
+      "source_url": "https://jobs.ashbyhq.com/ionic/robotics-junior",
+      "description": "<div class=\"content-intro\"><p>We build autonomous warehouse robots and the ROS2 stack that drives them.</p></div><h3>What you will do</h3><ul><li>Write C++ and Python nodes for our ROS2 navigation stack.</li><li>Write integration tests and reproduce field bugs.</li></ul>"
+    }
+  ]
+}
