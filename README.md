@@ -66,9 +66,10 @@ All settings are managed through YAML files, without modifying the source code.
 
 - **`search`** — Search locations (`adzuna_country`), `target_offers`, and per-query limits.
 - **`search.exclude_foreign_onsite`** — when `true` (default), hybrid/on-site postings **outside Spain** are dropped at ingestion and scoring (you cannot relocate!); 100 % remote roles from any country and any posting in Spain are kept. Set `false` for hybrid/on-site in the UK/Germany too.
+- **`search.exclude_seniority`** — seniority levels to drop instead of merely down-scoring, e.g. `[senior, lead]`. Only the posting title and the structured seniority label are inspected (never the description, so "you will work with our senior engineers" does not discard a junior role). Unlabelled postings are always kept.
 - **`families`** — Groups your target job roles. Each family includes:
   - `queries`: Search phrases sent to each job source.
-  - `sources`: `adzuna, arbeitnow, remoteok, himalayas` (+ ATS boards).
+  - `sources`: `adzuna, arbeitnow, remoteok, himalayas, hn_hiring, devglobaljobs` (+ ATS boards).
   - `skills`: A `skill → weight (1–10)` mapping used to calculate skill relevance.
   - `interest`: Editorial interest score (0–10), used as a scoring dimension.
 - **`scoring`** — `threshold` (apply), `review_threshold`, and the weights of the six scoring dimensions (`skills, experience, education, location, seniority, interest`), which must sum to 100.
@@ -141,7 +142,7 @@ src/jobpilot/
   config.py         # YAML loader + bilingual resolver (MasterCV.in_lang)
   models.py         # Data types: Offer, SourcePage, Triage...
   storage.py        # SQLite (upsert, deduplication, offers, scores)
-  sources/          # Adapters: adzuna, arbeitnow, remoteok, himalayas, ats_boards
+  sources/          # Adapters: adzuna, arbeitnow, remoteok, himalayas, hn_hiring, devglobaljobs, ats_boards
   pipeline/         # Search (sync) and scoring (run_score)
   matching/         # Skill taxonomy (aliases), signal extraction, scoring
 ```
@@ -224,9 +225,13 @@ Todo se edita en YAML, sin tocar código:
   scoring las ofertas **híbridas o presenciales fuera de España** (¡no puedes
   trasladarte!): se mantienen las 100% remoto de cualquier país y todo lo de
   España. Pon `false` solo si quieres también híbridas/presenciales UK/Alemania.
+- **`search.exclude_seniority`** — niveles de seniority que se descartan en vez de solo
+  bajar el score, p. ej. `[senior, lead]`. Solo se mira el título y la etiqueta
+  estructurada de seniority, nunca la descripción (así "trabajarás con nuestro equipo
+  senior" no elimina una oferta junior). Las ofertas sin etiqueta se mantienen siempre.
 - **`families`** — agrupa tus roles objetivo. Cada familia tiene:
   - `queries`: frases que se envían a cada fuente.
-  - `sources`: `adzuna, arbeitnow, remoteok, himalayas` (+ boards ATS).
+  - `sources`: `adzuna, arbeitnow, remoteok, himalayas, hn_hiring, devglobaljobs` (+ boards ATS).
   - `skills`: mapa `skill → peso (1-10)` usado para medir la relevancia.
   - `interest`: interés editorial (0-10) como dimensión del scoring.
 - **`scoring`** — `threshold` (apply), `review_threshold`, `weights` de las 6 dimensiones
@@ -353,7 +358,7 @@ src/jobpilot/
   llm.py            # backend LLM (opencode run --format json) + extract_json
   models.py         # tipos Offer, SourcePage, Triage...
   storage.py        # SQLite (upsert, dedupe, ofertas, scores)
-  sources/          # adaptadores: adzuna, arbeitnow, remoteok, himalayas, ats_boards
+  sources/          # adaptadores: adzuna, arbeitnow, remoteok, himalayas, hn_hiring, devglobaljobs, ats_boards
   pipeline/         # search (sync), score (run_score) y cv (tailor + render)
   matching/         # taxonomy (variantes de skills), extract (señales), scoring
 ```

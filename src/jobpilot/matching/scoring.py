@@ -19,7 +19,12 @@ from typing import Any
 
 from ..config import Config
 from ..models import Triage
-from .extract import extract_hard_filters, extract_offer_signals, foreign_relocation_reason
+from .extract import (
+    extract_hard_filters,
+    extract_offer_signals,
+    foreign_relocation_reason,
+    seniority_filter_reason,
+)
 
 _SENIORITY_RANK = {"lead": 20.0, "senior": 40.0, "midlevel": 70.0, "junior": 100.0, "entry": 100.0}
 
@@ -134,6 +139,10 @@ def score_offer(offer, family, config: Config) -> dict[str, Any]:
         relocation = foreign_relocation_reason(offer)
         if relocation:
             hard_filters.append(relocation)
+    if config.search.exclude_seniority:
+        seniority_reason = seniority_filter_reason(offer, config.search.exclude_seniority)
+        if seniority_reason:
+            hard_filters.append(seniority_reason)
     if hard_filters:
         triage = Triage.DISCARD
     w = config.scoring.weights

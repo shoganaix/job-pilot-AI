@@ -30,8 +30,8 @@ EU_COUNTRIES = {
 _SENIORITY_PATTERNS = [
     (r"\b(entry[- ]?level|fresh grad|new grad|junior|júnior|graduate|estudiante|becario|intern)\b", "junior"),
     (r"\b(mid[- ]?level|medior|intermediate|2\+|3\+)\b", "midlevel"),
-    (r"\b(senior|sr\.|sr |advanced)\b", "senior"),
-    (r"\b(lead|staff|principal)\b", "lead"),
+    (r"\b(senior|sr|advanced)\b", "senior"),
+    (r"\b(lead|staff|principal|director|head of|engineering manager|group manager)\b", "lead"),
 ]
 
 _YEARS_RE = re.compile(
@@ -79,9 +79,10 @@ def extract_skills(offer: Offer, skills: dict[str, float]) -> dict[str, float]:
     return found
 
 
-def extract_seniority(offer: Offer) -> str | None:
-    if offer.seniority:
-        val = offer.seniority.lower()
+def _classify_seniority(label: str | None, text: str) -> str | None:
+    """Seniority level from a structured label (preferred) or free text."""
+    if label:
+        val = label.lower()
         if "senior" in val:
             return "senior"
         if "lead" in val or "principal" in val or "staff" in val:
@@ -90,10 +91,30 @@ def extract_seniority(offer: Offer) -> str | None:
             return "junior"
         if "mid" in val:
             return "midlevel"
-    text = _text(offer).lower()
+    lowered = (text or "").lower()
     for pattern, level in _SENIORITY_PATTERNS:
-        if re.search(pattern, text):
+        if re.search(pattern, lowered):
             return level
+    return None
+
+
+def extract_seniority(offer: Offer) -> str | None:
+    return _classify_seniority(offer.seniority, _text(offer))
+
+
+def seniority_filter_reason(offer: Offer, levels: list[str] | None) -> str | None:
+    """Reason to drop a posting whose seniority level the user does not want.
+
+    Only the title and the structured seniority label are inspected: scanning the
+    description would throw away junior posts for merely mentioning "our senior
+    engineers" in the team blurb. Unlabelled postings are kept.
+    """
+    banned = {lvl.strip().lower() for lvl in (levels or []) if lvl}
+    if not banned:
+        return None
+    level = _classify_seniority(offer.seniority, offer.title or "")
+    if level in banned:
+        return f"nivel {level} excluido"
     return None
 
 

@@ -15,7 +15,7 @@ from typing import Any
 
 from .. import storage as store
 from ..config import Config, FamilyConfig, SearchLocation
-from ..matching.extract import foreign_relocation_reason
+from ..matching.extract import foreign_relocation_reason, seniority_filter_reason
 from ..models import Offer, Run, SourcePage
 from ..sources.base import JobSource, SourceError, SourceUnavailable, matches_query
 
@@ -154,6 +154,9 @@ def run_sync(
         for offer in offers:
             if config.search.exclude_foreign_onsite:
                 if foreign_relocation_reason(offer):
+                    continue
+            if config.search.exclude_seniority:
+                if seniority_filter_reason(offer, config.search.exclude_seniority):
                     continue
             offer.family = offer.family or guess_family(config, offer, family_id)
             offer.query = query

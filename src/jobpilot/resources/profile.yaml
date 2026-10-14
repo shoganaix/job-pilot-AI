@@ -21,6 +21,9 @@ search:
   # Excluye ofertas híbridas/presenciales fuera de España (no puedes trasladarte);
   # se mantienen: 100% remoto en cualquier país y todo lo que esté en España.
   exclude_foreign_onsite: true
+  # Descarta ofertas senior+/lead en vez de solo bajarlas de score.
+  # Se mira solo el titulo y la etiqueta estructurada, no la descripcion.
+  exclude_seniority: [senior, lead]
   locations:
     - { name: "Spain",   adzuna_country: "es" }
     - { name: "Germany", adzuna_country: "de" }
@@ -28,7 +31,8 @@ search:
 
 # ------------------------------------------------------------------------- #
 # Familias de búsqueda (agrupa tus ~20 roles). Ajusta queries/skills.
-# sources disponibles: adzuna, arbeitnow, remoteok, himalayas
+# sources disponibles: adzuna, arbeitnow, remoteok, himalayas,
+#                      hn_hiring, devglobaljobs
 # (greenhouse/lever se usan aparte vía ats_companies)
 # ------------------------------------------------------------------------- #
 families:
@@ -72,7 +76,7 @@ families:
         - "Robotik"
         - "Autonome Systeme"
         - "Autonome Fahrzeuge"
-    sources: [adzuna, arbeitnow, remoteok, himalayas]
+    sources: [adzuna, arbeitnow, remoteok, himalayas, hn_hiring, devglobaljobs]
     skills:
       ros: 9
       ros2: 9
@@ -121,7 +125,7 @@ families:
         - "Embedded Systems"
         - "Firmwareentwickler"
         - "Eingebettete Systeme"
-    sources: [adzuna, arbeitnow, remoteok, himalayas]
+    sources: [adzuna, arbeitnow, remoteok, himalayas, hn_hiring, devglobaljobs]
     skills:
       c: 9
       c++: 8
@@ -157,7 +161,7 @@ families:
         - "Elektronik"
         - "PCB Design"
         - "Hardwareentwickler"
-    sources: [adzuna, arbeitnow, remoteok, himalayas]
+    sources: [adzuna, arbeitnow, remoteok, himalayas, hn_hiring, devglobaljobs]
     skills:
       electronics: 8
       pcb: 7
@@ -188,7 +192,7 @@ families:
         - "Testingenieur"
         - "Test und Validierung"
         - "Validierungsingenieur"
-    sources: [adzuna, arbeitnow, remoteok, himalayas]
+    sources: [adzuna, arbeitnow, remoteok, himalayas, hn_hiring, devglobaljobs]
     skills:
       testing: 8
       validation: 7
@@ -222,7 +226,7 @@ families:
         - "Raumfahrt"
         - "Satellit"
         - "GNC"
-    sources: [adzuna, arbeitnow, remoteok, himalayas]
+    sources: [adzuna, arbeitnow, remoteok, himalayas, hn_hiring, devglobaljobs]
     skills:
       "systems engineering": 8
       requirements: 7
@@ -255,7 +259,7 @@ families:
         - "Automatisierung"
         - "Regelungstechnik"
         - "Steuerungstechnik"
-    sources: [adzuna, arbeitnow, remoteok, himalayas]
+    sources: [adzuna, arbeitnow, remoteok, himalayas, hn_hiring, devglobaljobs]
     skills:
       plc: 6
       scada: 5
@@ -286,7 +290,7 @@ families:
         - "Softwareentwickler"
         - "Computer Vision"
         - "Deep Learning"
-    sources: [adzuna, arbeitnow, remoteok, himalayas]
+    sources: [adzuna, arbeitnow, remoteok, himalayas, hn_hiring, devglobaljobs]
     skills:
       python: 9
       "computer vision": 8
@@ -334,7 +338,7 @@ families:
         - "Flugsoftware"
         - "Raumfahrt Softwareentwickler"
 
-    sources: [adzuna, arbeitnow, remoteok, himalayas]
+    sources: [adzuna, arbeitnow, remoteok, himalayas, hn_hiring, devglobaljobs]
 
     skills:
       python: 9
@@ -382,7 +386,7 @@ families:
         - "Digitaler Zwilling"
         - "Robotersimulation"
 
-    sources: [adzuna, arbeitnow, remoteok, himalayas]
+    sources: [adzuna, arbeitnow, remoteok, himalayas, hn_hiring, devglobaljobs]
 
     skills:
       simulation: 9
@@ -424,7 +428,7 @@ families:
         - "Systemintegration"
         - "Robotik Integration"
 
-    sources: [adzuna, arbeitnow, remoteok, himalayas]
+    sources: [adzuna, arbeitnow, remoteok, himalayas, hn_hiring, devglobaljobs]
 
     skills:
       robotics: 9
@@ -458,8 +462,8 @@ profile:
   seniority_target: junior
   languages: [es, en]
   locations:
-    - { area: "Madrid (Spain)", kind: onsite,  weight: 100 }
-    - { area: "Spain",          kind: onsite,  weight: 85 }
+    - { area: "Madrid (Spain)", kind: onsite,  weight: 70 }
+    - { area: "Spain",          kind: onsite,  weight: 60 }
     - { area: "Remote EU",      kind: remote,  weight: 90 }
     - { area: "Remote global",  kind: remote,  weight: 60 }
   exclude_companies: []

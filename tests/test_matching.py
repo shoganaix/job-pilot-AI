@@ -10,6 +10,7 @@ from jobpilot.matching.extract import (
     foreign_relocation_reason,
     is_remote_offer,
     is_spain_offer,
+    seniority_filter_reason,
 )
 from jobpilot.matching.scoring import score_offer
 from jobpilot.matching.taxonomy import (
@@ -241,3 +242,58 @@ def test_extract_offer_signals_complete(tmp_path):
     assert sig["experience_years"] == 2
     assert sig["location"]["area"] == "Spain"
     assert "c++" in sig["skills"]
+
+
+# --------------------------------------------------------------------------- #
+# seniority filter
+# --------------------------------------------------------------------------- #
+
+BANNED = ["senior", "lead"]
+
+
+def test_seniority_filter_drops_senior_titles():
+    for title in ("Senior Backend Engineer", "Sr. Embedded Engineer",
+                  "Staff Software Engineer", "Principal Engineer",
+                  "Director, People Business Partner", "Head of Robotics",
+                  "Engineering Manager"):
+        assert seniority_filter_reason(_offer(title=title), BANNED), title
+
+
+def test_seniority_filter_keeps_junior_and_unlabelled():
+    for title in ("Junior Robotics Engineer", "Entry Level C++ Developer",
+                  "Graduate Software Engineer", "Mechatronics Engineer",
+                  "Robotics Engineer (ROS2)"):
+        assert seniority_filter_reason(_offer(title=title), BANNED) is None, title
+
+
+def test_seniority_filter_uses_structured_label():
+    offer = _offer(title="Software Engineer", seniority="Senior")
+    assert seniority_filter_reason(offer, BANNED)
+    junior = _offer(title="Software Engineer", seniority="Junior")
+    assert seniority_filter_reason(junior, BANNED) is None
+
+
+def test_seniority_filter_ignores_description_mentions():
+    # a junior post that merely mentions senior colleagues must survive
+    offer = _offer(title="Junior Robotics Engineer",
+                   description="You will work alongside our senior engineers and the staff team.")
+    assert seniority_filter_reason(offer, BANNED) is None
+
+
+def test_seniority_filter_is_opt_in():
+    offer = _offer(title="Senior Backend Engineer")
+    assert seniority_filter_reason(offer, []) is None
+    assert seniority_filter_reason(offer, None) is None
+
+
+def test_score_offer_discards_excluded_seniority(tmp_path):
+    config = sample_config(tmp_path)
+    config.search.exclude_seniority = BANNED
+    family = config.family("robotics")
+    res = score_offer(_offer(title="Senior Robotics Engineer"), family, config)
+    assert res["triage"] is Triage.DISCARD
+    assert any("senior" in f for f in res["hard_filters"])
+    kept = score_offer(_offer(title="Junior Robotics Engineer",
+                              description="ROS2, C++, Python."), family, config)
+    assert kept["hard_filters"] == []
+    assert kept["total"] > 0

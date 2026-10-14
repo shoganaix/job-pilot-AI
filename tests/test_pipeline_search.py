@@ -111,6 +111,22 @@ def test_sync_skips_disabled_and_several_families(tmp_path):
     assert stats.total_stored == 2
 
 
+def test_sync_does_not_store_excluded_seniority(tmp_path):
+    cfg = _config(tmp_path)
+    cfg.search.exclude_seniority = ["senior", "lead"]
+    conn = storage.connect(cfg.db_path)
+    source = FakeSource(offers=[
+        _offer("1", "Senior Robotics Engineer"),
+        _offer("2", "Robotics Engineer"),
+    ])
+    run = storage.run_start(conn)
+    stats = run_sync(cfg, conn, {"fake": source}, run=run)
+    assert stats.total_stored == 1
+    titles = [o["title"] for o in storage.list_offers(conn)]
+    assert titles == ["Robotics Engineer"]
+    conn.close()
+
+
 def test_sync_scroll_feed_fetches_once_and_sieves_all_queries(tmp_path):
     cfg = _config(tmp_path)
     cfg.families[1] = FamilyConfig(id="embedded", label="Embedded", queries=["Embedded Systems"],
