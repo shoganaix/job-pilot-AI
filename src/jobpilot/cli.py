@@ -12,6 +12,7 @@
     jobpilot score       (Fase 2)   run the matching engine
     jobpilot cv          (Fase 3)   tailor + export tailored CVs
     jobpilot report      generate the HTML dashboard (output/report.html)
+    jobpilot web         local web UI to edit config/*.yaml in the browser
 """
 
 from __future__ import annotations
@@ -28,6 +29,7 @@ from rich.table import Table
 
 from .config import (
     DEFAULT_DB_PATH,
+    DEFAULT_PROFILE,
     REPO_ROOT,
     ConfigError,
     load_config,
@@ -125,6 +127,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--out", default=None, help="output path (default output/report.html)")
     p.add_argument("--open", action="store_true", help="open the report in the browser")
 
+    p = sub.add_parser("web", help="local web UI to edit config/*.yaml in the browser")
+    p.add_argument("--port", type=int, default=8765, help="port on 127.0.0.1 (default 8765)")
+    p.add_argument("--open", action="store_true", help="open the browser when the server starts")
+
     return parser
 
 
@@ -163,6 +169,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         return _cmd_cv(args)
     if args.command == "report":
         return _cmd_report(args)
+    if args.command == "web":
+        return _cmd_web(args)
     return 1
 
 
@@ -560,6 +568,39 @@ def _cmd_report(args: argparse.Namespace) -> int:
     if args.open:
         webbrowser.open(path.resolve().as_uri())
     return 0
+
+
+def _cmd_web(args: argparse.Namespace) -> int:
+    # Not load_config(): the web UI must start even when the YAML is broken,
+    # otherwise it could not be used to repair it.
+    import yaml
+
+    if not DEFAULT_PROFILE.exists():
+        CONSOLE.print(f"[red]perfil no encontrado:[/] {DEFAULT_PROFILE}. "
+                      "Ejecuta `jobpilot init` primero.")
+        return 2
+
+    raw = yaml.safe_load(DEFAULT_PROFILE.read_text(encoding="utf-8")) or {}
+    top = raw.get("project", {}) or {}
+
+    def _resolve(value, default: Path) -> Path:
+        if value is None:
+            return default
+        path = Path(str(value))
+        return path if path.is_absolute() else (REPO_ROOT / path)
+
+    master_cv_path = _resolve(top.get("master_cv"), REPO_ROOT / "config" / "master_cv.yaml")
+    output_dir = _resolve(top.get("output_dir"), REPO_ROOT / "output")
+
+    from .webui.server import serve
+
+    return serve(
+        DEFAULT_PROFILE,
+        master_cv_path,
+        port=args.port,
+        report_path=output_dir / "report.html",
+        open_browser=args.open,
+    )
 
 
 def _cmd_open(args: argparse.Namespace) -> int:

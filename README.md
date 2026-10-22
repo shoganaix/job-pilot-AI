@@ -19,6 +19,7 @@ Personal AI-powered job application agent (CLI + SQLite). Searches for job oppor
 | `jobpilot open <id>` | Opens the job listing URL in your browser |
 | `jobpilot cv <id>` | Generates the tailored CV (markdown + PDF) into `output/cv/` |
 | `jobpilot report` | Generates the HTML dashboard (`output/report.html`) |
+| `jobpilot web` | Local web UI (127.0.0.1) to edit `config/*.yaml` in the browser |
 
 ### Scoring and triage
 
@@ -125,6 +126,20 @@ The **skills dimension** rewards how much of the offer's *asked* skills you cove
 
 `jobpilot report` renders a self-contained `output/report.html` (no external assets) with KPI cards, the application queue, the latest scoring run, a score breakdown for the top offers and a per-family summary. Use `--open` to view it in your browser, or `--family X` to filter the scoring tables.
 
+## Web UI to edit the configs (`jobpilot web`)
+
+`jobpilot web` starts a local server (bound to `127.0.0.1` only) with browser forms for the three YAML files, so you don't have to edit them by hand:
+
+```bash
+jobpilot web            # http://127.0.0.1:8765  (--port N to change it, --open to launch the browser)
+```
+
+- **Mi CV**: contact, summary, experience, education, skills, projects and certifications (es/en fields side by side; list rows are added/removed with buttons).
+- **Preferencias**: `search` (targets, exclusions, locations), `profile` (seniority, languages, excluded companies, location weights) and `ats_companies`.
+- **Familias**: per-family queries, sources and keyword→weight skills.
+
+Safety rules: every save is validated with the *same parsers the CLI uses* — if anything fails, the form re-renders with the error and nothing is written. Each successful save keeps the previous file as `<name>.yaml.bak` (PyYAML drops comments when rewriting, so the backup is where they survive). POSTs are rejected unless they come from this server (`Host` check), and the server never listens outside localhost. It uses only the standard library plus PyYAML (no new dependencies).
+
 ## Development
 
 Run linting and tests:
@@ -145,6 +160,7 @@ src/jobpilot/
   sources/          # Adapters: adzuna, arbeitnow, remoteok, himalayas, hn_hiring, devglobaljobs, ats_boards
   pipeline/         # Search (sync) and scoring (run_score)
   matching/         # Skill taxonomy (aliases), signal extraction, scoring
+  webui/            # `jobpilot web`: local forms to edit config/*.yaml
 ```
 
 ## Privacy
@@ -176,6 +192,7 @@ por oferta y mantiene una cola de aplicaciones.
 | `jobpilot open <id>` | Abre la URL de la oferta en el navegador |
 | `jobpilot cv <id>` | Genera el CV tailorizado (markdown + PDF) en `output/cv/` |
 | `jobpilot report` | Genera el dashboard HTML (`output/report.html`) |
+| `jobpilot web` | Web local (127.0.0.1) para editar `config/*.yaml` desde el navegador |
 
 Triage del scoring:
 - **apply** → score ≥ 65 (y relevancia de skills mínima) → aplicar.
@@ -319,6 +336,29 @@ aplicaciones, las mejores posiciones del último run con desglose de scoring
 - El report muestra esas fechas y la antigüedad en la tabla de la cola.
 - `--open` abre el report en el navegador; `--family X` filtra las tablas de scoring.
 
+## Web para editar la configuración (`jobpilot web`)
+
+`jobpilot web` arranca un servidor local (solo `127.0.0.1`) con formularios
+en el navegador para los tres YAML, para no editarlos a mano:
+
+```bash
+jobpilot web            # http://127.0.0.1:8765  (--port N para cambiar, --open abre el navegador)
+```
+
+- **Mi CV**: contacto, resumen, experiencia, educación, skills, proyectos y
+  certificaciones (campos es/en en paralelo; las filas se añaden/quitan con botones).
+- **Preferencias**: `search` (objetivos, exclusiones, ubicaciones), `profile`
+  (seniority, idiomas, empresas excluidas, pesos por ubicación) y `ats_companies`.
+- **Familias**: queries, sources y skills keyword→peso de cada familia.
+
+Reglas de seguridad: cada guardado se valida con **los mismos parsers que la
+CLI** — si algo falla, el formulario se re-renderiza con el error y no se
+escribe nada. Cada guardado correcto deja el fichero anterior en
+`<nombre>.yaml.bak` (PyYAML pierde los comentarios al reescribir, así que el
+backup es donde sobreviven). Los POST se rechazan si no vienen de este servidor
+(comprobación de `Host`) y el servidor solo escucha en localhost. Solo usa la
+stdlib y PyYAML (cero dependencias nuevas).
+
 ## Calibración del scoring
 
 La dimensión **skills** premia cuánto cubres las skills que *pide* la oferta y ya
@@ -361,6 +401,7 @@ src/jobpilot/
   sources/          # adaptadores: adzuna, arbeitnow, remoteok, himalayas, hn_hiring, devglobaljobs, ats_boards
   pipeline/         # search (sync), score (run_score) y cv (tailor + render)
   matching/         # taxonomy (variantes de skills), extract (señales), scoring
+  webui/            # `jobpilot web`: formularios locales para config/*.yaml
 ```
 ## 3. Ejemplo completo: desde arrancar hasta enviar una candidatura
 

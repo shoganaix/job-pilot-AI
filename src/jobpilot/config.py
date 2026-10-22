@@ -169,6 +169,9 @@ class Config:
     profile: ProfileConfig
     output_dir: Path = field(default_factory=lambda: Path("output"))
     ats_companies: dict[str, list[str]] = field(default_factory=dict)  # source -> [company slug]
+    master_cv_path: Path = field(
+        default_factory=lambda: REPO_ROOT / "config" / "master_cv.yaml"
+    )  # where the CV lives on disk (the web UI edits it in place)
 
     def family(self, family_id: str) -> FamilyConfig:
         for fam in self.families:
@@ -293,15 +296,17 @@ def load_config(profile_path: Path = DEFAULT_PROFILE) -> Config:
     raw = yaml.safe_load(profile_path.read_text(encoding="utf-8")) or {}
     top = raw.get("project", {})
     search = raw.get("search", {}) or {}
+    master_cv_path = _resolve_path(
+        top.get("master_cv"), REPO_ROOT / "config" / "master_cv.yaml"
+    )
     return Config(
         profile_path=profile_path,
         db_path=_resolve_path(top.get("db_path"), DEFAULT_DB_PATH),
         snapshot_dir=_resolve_path(
             top.get("snapshot_dir"), REPO_ROOT / "data" / "snapshots"
         ),
-        master_cv=parse_master_cv(
-            _resolve_path(top.get("master_cv"), REPO_ROOT / "config" / "master_cv.yaml")
-        ),
+        master_cv=parse_master_cv(master_cv_path),
+        master_cv_path=master_cv_path,
         search=parse_search(search),
         families=parse_families(raw.get("families", []) or []),
         scoring=ScoringConfig(
