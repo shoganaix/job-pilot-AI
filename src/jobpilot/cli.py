@@ -82,6 +82,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--dry-run", action="store_true", help="fetch but do not persist")
     p.add_argument("--source", action="append", default=None, help="only use these sources")
     p.add_argument("--max-pages", type=int, default=None, help="override max pages per query")
+    p.add_argument("--relaxed-dedupe", action="store_true",
+                   help="also collapse offers matching by URL or title+company into one row")
 
     p = sub.add_parser("offers", help="list stored offers")
     p.add_argument("--family", action="append", default=None)
@@ -109,8 +111,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--show", type=int, default=5, help="rows shown per triage")
     p.add_argument("--details", action="store_true", help="print dimension breakdown")
 
-    p = sub.add_parser("cv", help="generate a tailored CV for an offer")
-    p.add_argument("id", type=int, help="offer id (see `jobpilot offers`)")
+    p = sub.add_parser("cv", help="generate a tailored CV for an offer (or list them)")
+    p.add_argument("id", help="offer id (see `jobpilot offers`) or 'list'")
     p.add_argument("--lang", choices=["es", "en"], default=None, help="CV language")
     p.add_argument("--family", default=None, help="force the family to tailor against")
     p.add_argument("--no-llm", action="store_true", help="deterministic heuristic, skip the LLM")
@@ -284,6 +286,7 @@ def _cmd_sync(args: argparse.Namespace) -> int:
             family_filter=args.family,
             max_pages=args.max_pages,
             dry_run=args.dry_run,
+            relaxed_dedupe=args.relaxed_dedupe,
         )
         elapsed = time.time() - started
         if run and not args.dry_run:
@@ -474,11 +477,18 @@ def _cmd_cv(args: argparse.Namespace) -> int:
     from .pipeline.cv import CVError, generate_cv
 
     conn = storage.connect(config.db_path)
+    if args.id == "list":
+        return _cmd_cv_list(conn)
+    try:
+        offer_id = int(args.id)
+    except ValueError:
+        CONSOLE.print(f"[red]cv error:[/] id debe ser un número o 'list' (recibido: {args.id!r})")
+        return 1
     try:
         result = generate_cv(
             config,
             conn,
-            args.id,
+            offer_id,
             lang=args.lang,
             family_filter=args.family,
             use_llm=not args.no_llm,
@@ -508,6 +518,33 @@ def _cmd_cv(args: argparse.Namespace) -> int:
     CONSOLE.print("Para cargarlo en la cola: "
                   f"[bold]jobpilot queue set {meta['offer_id']} --status apply "
                   f"--cv-file \"{files.get('md', '')}\"[/]")
+    return 0
+
+
+def _cmd_cv_list(conn) -> int:
+    from . import storage
+
+    rows = storage.list_cv_variants(conn)
+    if not rows:
+        CONSOLE.print("Aún no se ha generado ningún CV. "
+                      "Usa [bold]jobpilot cv <id>[/] para generar uno.")
+        return 0
+
+    table = Table(title=f"CVs generados ({len(rows)})")
+    table.add_column("id", justify="right")
+    table.add_column("familia")
+    table.add_column("puesto")
+    table.add_column("creado")
+    for row in rows:
+        table.add_row(
+            str(row["id"]),
+            row["family"],
+            row["job_title"] or "-",
+            row["created_at"],
+        )
+    CONSOLE.print(table)
+    CONSOLE.print("Usa [bold]jobpilot cv <id>[/] con el id de la oferta "
+                  "(no el de esta tabla) para regenerar un CV.")
     return 0
 
 

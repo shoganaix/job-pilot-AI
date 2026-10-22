@@ -209,3 +209,29 @@ def test_generate_cv_unknown_offer(tmp_path):
     with pytest.raises(CVError, match="not found"):
         generate_cv(config, conn, 999, use_llm=False, out_dir=tmp_path)
     conn.close()
+
+
+# --------------------------------------------------------------------------- #
+# `jobpilot cv list`
+
+
+def test_cmd_cv_list_shows_generated_variants(tmp_path, capsys):
+    from jobpilot.cli import _cmd_cv_list
+
+    conn = storage.connect(tmp_path / "t.db")
+    storage.save_cv_variant(conn, "robotics", "# Maria\nCV de prueba", "Junior Robotics Engineer")
+
+    assert _cmd_cv_list(conn) == 0
+    out = capsys.readouterr().out
+    assert "Junior Robotics Engineer" in out
+    assert "robotics" in out
+    conn.close()
+
+
+def test_cmd_cv_list_empty_db(tmp_path, capsys):
+    from jobpilot.cli import _cmd_cv_list
+
+    conn = storage.connect(tmp_path / "t.db")
+    assert _cmd_cv_list(conn) == 0
+    assert "Aún no se ha generado ningún CV" in capsys.readouterr().out
+    conn.close()
