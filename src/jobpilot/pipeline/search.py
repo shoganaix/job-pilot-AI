@@ -130,6 +130,7 @@ def run_sync(
     dry_run: bool = False,
     snapshot_dir: Path | None = None,
     sleep_s: float = 0.5,
+    relaxed_dedupe: bool = False,
 ) -> SyncStats:
     """Run the full search and persist offers."""
     stats = SyncStats()
@@ -165,7 +166,7 @@ def run_sync(
         if not kept:
             return
         if not dry_run and run_id:
-            stored = store.upsert_offers(conn, run_id, kept).get(source, [0, 0, 0])
+            stored = store.upsert_offers(conn, run_id, kept, relaxed=relaxed_dedupe).get(source, [0, 0, 0])
             record(source, kept, stored)
 
     def fetch_scroll_pages(
@@ -260,7 +261,7 @@ def run_sync(
                         offer.family = guess_family(config, offer, "target")
                     stats.seen_by_family["target"] = stats.seen_by_family.get("target", 0) + len(batch)
                     if not dry_run and run_id:
-                        stored = store.upsert_offers(conn, run_id, batch).get(src_name, [0, 0, 0])
+                        stored = store.upsert_offers(conn, run_id, batch, relaxed=relaxed_dedupe).get(src_name, [0, 0, 0])
                         record(src_name, batch, stored)
             except (SourceError, SourceUnavailable) as exc:
                 stats.disabled[f"{src_name}[{company}]"] = str(exc)

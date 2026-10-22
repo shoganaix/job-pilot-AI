@@ -12,7 +12,7 @@ import sqlite3
 from datetime import UTC, datetime
 from pathlib import Path
 
-from .dedupe import compute_dedupe_hash
+from .dedupe import compute_dedupe_hash, normalize
 from .models import AppStatus, Offer, Run, Score
 
 _SCHEMA = """
@@ -152,14 +152,53 @@ def latest_scored_run(conn: sqlite3.Connection) -> int | None:
 # --------------------------------------------------------------------------- #
 # Offers
 # --------------------------------------------------------------------------- #
-def upsert_offers(conn: sqlite3.Connection, run_id: int, offers: list[Offer]) -> dict:
+def _find_relaxed(conn: sqlite3.Connection, offer: Offer, skip_ids: set[int]) -> int | None:
+    """Best-effort match for the same job under a looser key.
+
+    Match order: URL first (strongest signal across boards), then normalized
+    title+company ignoring location, so a board that republishes a role with a
+    slightly different location string is not stored twice. ``skip_ids`` lets
+    the caller exclude rows already claimed earlier in the same batch.
+    """
+    for url in (offer.apply_url, offer.url):
+        if url:
+            row = conn.execute(
+                "SELECT id FROM offers WHERE apply_url = ? OR url = ? LIMIT 1",
+                (url, url),
+            ).fetchone()
+            if row is not None and row["id"] not in skip_ids:
+                return int(row["id"])
+    title = normalize(offer.title)
+    company = normalize(offer.company)
+    if not title or not company:
+        return None
+    candidates = conn.execute(
+        "SELECT id, title, company FROM offers WHERE company = ? COLLATE NOCASE",
+        (offer.company,),
+    ).fetchall()
+    for row in candidates:
+        if int(row["id"]) in skip_ids:
+            continue
+        if normalize(row["title"]) == title and normalize(row["company"]) == company:
+            return int(row["id"])
+    return None
+
+
+def upsert_offers(
+    conn: sqlite3.Connection, run_id: int, offers: list[Offer], *, relaxed: bool = False
+) -> dict:
     """Insert or update a batch of offers.
 
     Returns ``{source: (inserted, updated, dupes)}`` where *dupes* counts
     offers whose cross-source fingerprint already exists in the database or in
     an earlier row of the same batch (they are collapsed to the first).
+
+    With ``relaxed=True``, when no exact fingerprint matches, an offer is also
+    collapsed into an existing row found by URL or by normalized title+company
+    (ignoring location); the old row is mutated instead of inserted twice.
     """
     stats: dict[str, list[int]] = {}
+    claimed: set[int] = set()
     for offer in offers:
         bucket = stats.setdefault(offer.source, [0, 0, 0])
         existing = conn.execute(
@@ -184,12 +223,34 @@ def upsert_offers(conn: sqlite3.Connection, run_id: int, offers: list[Offer]) ->
                 ),
             )
             offer_id = existing["id"]
+            claimed.add(offer_id)
             bucket[1] += 1
         else:
             holder = conn.execute(
                 "SELECT id FROM offers WHERE dedupe_hash = ? LIMIT 1", (dedupe_hash,)
             ).fetchone()
             if holder is not None:
+                bucket[2] += 1
+                continue
+            relaxed_id = _find_relaxed(conn, offer, claimed) if relaxed else None
+            if relaxed_id is not None:
+                conn.execute(
+                    """UPDATE offers SET title=?, company=?, location=?, country=?,
+                       remote=?, url=?, apply_url=?, description=?, salary_min=?,
+                       salary_max=?, salary_text=?, currency=?, category=?,
+                       seniority=?, published_at=?, last_seen_run=?, dedupe_hash=?
+                       WHERE id=?""",
+                    (
+                        offer.title, offer.company, offer.location, offer.country,
+                        int(offer.remote) if offer.remote is not None else None,
+                        offer.url, offer.apply_url, offer.description,
+                        offer.salary_min, offer.salary_max, offer.salary_text,
+                        offer.currency, offer.category, offer.seniority,
+                        offer.published_at, run_id, dedupe_hash, relaxed_id,
+                    ),
+                )
+                offer_id = relaxed_id
+                claimed.add(offer_id)
                 bucket[2] += 1
                 continue
             cur = conn.execute(

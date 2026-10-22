@@ -31,6 +31,71 @@ def test_upsert_dedupe_and_update(tmp_path):
     conn.close()
 
 
+def test_relaxed_dedupe_by_url(tmp_path):
+    conn = storage.connect(temp_db_path(tmp_path))
+    run = storage.run_start(conn, "test")
+    storage.upsert_offers(conn, run.id, [
+        Offer(source="greenhouse", source_id="g1", title="Robotics Engineer",
+              company="Acme", location="Remote", apply_url="https://acme.dev/jobs/1"),
+    ])
+    res = storage.upsert_offers(conn, run.id, [
+        Offer(source="lever", source_id="l1", title="Robotics Engineer",
+              company="Acme", location="Berlin", apply_url="https://acme.dev/jobs/1"),
+    ], relaxed=True)
+    assert res["lever"] == [0, 0, 1]
+    assert storage.count_offers(conn) == 1
+    row = storage.list_offers(conn)[0]
+    assert row["location"] == "Berlin"  # old row mutated, not duplicated
+    assert row["source"] == "greenhouse"  # original identity kept
+    conn.close()
+
+
+def test_relaxed_dedupe_by_title_company_ignoring_location(tmp_path):
+    conn = storage.connect(temp_db_path(tmp_path))
+    run = storage.run_start(conn, "test")
+    storage.upsert_offers(conn, run.id, [
+        Offer(source="hn_hiring", source_id="h1", title="Robotics Engineer",
+              company="Acme Robotics", location="Remote (Global)"),
+    ])
+    res = storage.upsert_offers(conn, run.id, [
+        Offer(source="devglobaljobs", source_id="d1", title="Robotics Engineer ",
+              company="ACME ROBOTICS", location="San Francisco"),
+    ], relaxed=True)
+    assert res["devglobaljobs"] == [0, 0, 1]
+    assert storage.count_offers(conn) == 1
+    conn.close()
+
+
+def test_relaxed_dedupe_off_by_default(tmp_path):
+    conn = storage.connect(temp_db_path(tmp_path))
+    run = storage.run_start(conn, "test")
+    storage.upsert_offers(conn, run.id, [
+        Offer(source="greenhouse", source_id="g1", title="Robotics Engineer",
+              company="Acme", location="Remote", apply_url="https://acme.dev/jobs/1"),
+    ])
+    res = storage.upsert_offers(conn, run.id, [
+        Offer(source="lever", source_id="l1", title="Robotics Engineer",
+              company="Acme", location="Berlin", apply_url="https://acme.dev/jobs/1"),
+    ])
+    assert res["lever"] == [1, 0, 0]  # inserted: no relaxed match without the flag
+    assert storage.count_offers(conn) == 2
+    conn.close()
+
+
+def test_relaxed_dedupe_two_new_offers_same_company_not_merged(tmp_path):
+    conn = storage.connect(temp_db_path(tmp_path))
+    run = storage.run_start(conn, "test")
+    res = storage.upsert_offers(conn, run.id, [
+        Offer(source="hn_hiring", source_id="h1", title="Robotics Engineer",
+              company="Acme", location="Remote"),
+        Offer(source="hn_hiring", source_id="h2", title="Embedded Engineer",
+              company="Acme", location="Remote"),
+    ], relaxed=True)
+    assert res["hn_hiring"] == [2, 0, 0]
+    assert storage.count_offers(conn) == 2
+    conn.close()
+
+
 def test_application_queue(tmp_path):
     conn = storage.connect(temp_db_path(tmp_path))
     run = storage.run_start(conn)
